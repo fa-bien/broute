@@ -1,5 +1,4 @@
 using CPUTime
-using Traceur
 
 struct TSPData{ T<:Real }
     n::Int    # number of nodes
