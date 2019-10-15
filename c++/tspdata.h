@@ -20,7 +20,7 @@ vector<string> tokenize(string line) {
 template <class T> class TSPData {
 protected:
     // number of points
-    int n_;
+    unsigned int n_;
     // distance matrix
     vector<vector<T> > d_;
 
