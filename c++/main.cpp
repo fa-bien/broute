@@ -4,11 +4,11 @@
 // read input file and return corresponding data and solutions
 template<class T> pair<shared_ptr<TSPData<T> >, vector<TSPSolution<T> > >
 read_data(string fname) {
-    int n = 0;
+    unsigned int n = 0;
     vector<vector<int> > d;
     vector<vector<int> > tours;
     vector<TSPSolution<T> > solutions;
-    int nsols = 0;
+    unsigned int nsols = 0;
     ifstream infile(fname.c_str());
     if (! infile.is_open()) {
 	cerr << "Can't open file: " << fname << endl;
