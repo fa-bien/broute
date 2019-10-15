@@ -3,7 +3,17 @@ import java.io.BufferedReader;
 import java.util.StringTokenizer;
 import java.io.IOException;
 import java.io.File;
-import javafx.util.Pair; 
+
+class Pair<T1, T2>{
+    protected T1 key;
+    protected T2 value;
+    public Pair(T1 key, T2 value) {
+	this.key = key;
+	this.value = value;
+    }
+    public T1 getKey() { return key; }
+    public T2 getValue() { return value; }
+}
 
 public class TSPBenchmark{
     
