@@ -73,8 +73,8 @@ public class TSPBenchmark{
 	    totalLS += t2 - t1;
 	    nimpr += n;
 	}
-	return new Pair<Integer, Double>(new Integer(nimpr),
-					 new Double(totalLS/1e9));
+	return new Pair<Integer, Double>(Integer.valueOf(nimpr),
+					 Double.valueOf(totalLS/1e9));
     }
     
     private static void parse_many(String dirname) {
