@@ -22,15 +22,16 @@ protected:
     // number of points
     unsigned int n_;
     // distance matrix
-    vector<vector<T> > d_;
+    int *d_;
 
 public:
-    TSPData(int n, vector<vector<T> > d) {n_ = n; d_ = d;}
+    TSPData(int n, int *d) {n_ = n; d_ = d;}
+    // ~TSPData() { delete[] d_; }
     // load data from file
     TSPData(string fname) {
     }
     // getters are here
-    T d(int i, int j) const { return d_[i][j]; }
+    T d(int i, int j) const { return d_[i*n_+j]; }
     int n() const { return n_; }
 };
 

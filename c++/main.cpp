@@ -5,7 +5,8 @@
 template<class T> pair<shared_ptr<TSPData<T> >, vector<TSPSolution<T> > >
 read_data(string fname) {
     unsigned int n = 0;
-    vector<vector<int> > d;
+    T *d;
+    unsigned int ditems = 0;
     vector<vector<int> > tours;
     vector<TSPSolution<T> > solutions;
     unsigned int nsols = 0;
@@ -25,15 +26,12 @@ read_data(string fname) {
 	} else if (n == 0 and tokens.size() == 2) {
 	    n = stoi(tokens[0]);
 	    nsols = stoi(tokens[1]);
-	} else if (d.size() < n) {
-	    vector<T> row;
-	    T tmp;
+	    d = new int[n*n];
+	} else if (ditems < n*n) {
 	    stringstream gg(line);
 	    for (unsigned int i=0; i < n; i++) {
-		gg >> tmp;
-		row.push_back(tmp);
+		gg >> d[ditems++];
 	    }
-	    d.push_back(row);
 	} else if (tours.size() < nsols) {
 	    vector<int> tour;
 	    int tmp;
