@@ -64,7 +64,7 @@ function first_improvement(d::TSPData{T}, sol::TSPSolution) where T
     return false
 end
 
-function benchmark_one(data::TSPData, solutions::Vector{TSPSolution})
+function benchmark_one(data::TSPData{T}, solutions::Vector{TSPSolution}) where T
     total2opttime = 0.0
     nimpr = 0
     for s in solutions
@@ -81,8 +81,8 @@ function benchmark_many(dirname::String)
     for fname in readdir(dirname)
         d, sols = read_data(joinpath(dirname, fname), Int)
         n, l = benchmark_one(d, sols)
-        println(join(("julia", fname, string(d.n), string(size(sols,1)), string(n),
-                      string(l)),
+        println(join((basename(pwd()), fname, string(d.n),
+                      string(size(sols,1)), string(n), string(l)),
                      ","))
         nimpr += n
     end
