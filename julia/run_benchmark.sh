@@ -1,3 +1,3 @@
 #!/bin/bash
 
-julia tspbenchmark.jl $1
+julia --check-bounds=no --inline=yes -O3 tspbenchmark.jl $1
