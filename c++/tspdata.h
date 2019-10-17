@@ -31,8 +31,8 @@ public:
     TSPData(string fname) {
     }
     // getters are here
-    T d(int i, int j) const { return d_[i*n_+j]; }
-    int n() const { return n_; }
+    const T d(int i, int j) const { return d_[i*n_+j]; }
+    const int n() const { return n_; }
 };
 
 #endif
