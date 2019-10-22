@@ -5,7 +5,7 @@
 template<class T> pair<shared_ptr<TSPData<T> >, vector<TSPSolution<T> > >
 read_data(string fname) {
     unsigned int n = 0;
-    T *d;
+    T *d = NULL;
     unsigned int ditems = 0;
     vector<int*> tours;
     vector<TSPSolution<T> > solutions;
