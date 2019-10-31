@@ -1,1 +1,0 @@
-../c++-static/tspdata.h

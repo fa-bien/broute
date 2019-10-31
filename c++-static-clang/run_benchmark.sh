@@ -1,1 +1,0 @@
-../c++-static/run_benchmark.sh
