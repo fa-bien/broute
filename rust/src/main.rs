@@ -7,7 +7,7 @@ use cpu_time::ProcessTime;
 
 struct TSPData {
     n: usize,
-    d: Vec<u32>,
+    d: Box<[u32]>,
 }
 
 impl TSPData {
@@ -77,7 +77,7 @@ fn read_data(fname: &str) -> (TSPData, Vec<TSPSolution>) {
             }
         }
     }
-    return (TSPData{n: n, d: d}, solutions);
+    return (TSPData{n: n, d: d.into_boxed_slice()}, solutions);
 }
 
 fn benchmark_one(data: &TSPData, solutions: &mut Vec<TSPSolution>)
