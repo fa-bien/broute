@@ -2,11 +2,11 @@ runs <- read.csv('allruns.csv')
 
 library(ggplot2)
 
-## # All runtimes in seconds
-## pdf('language_comparison_absolute.pdf')
-## ggplot(runs, aes(x=factor(n), y=CPU_2opt, fill=factor(language))) +
-##     geom_boxplot() + labs(x="n", y="2-opt CPU (s)", fill="Language")
-## dev.off()
+# All runtimes in seconds
+pdf('language_comparison_absolute.pdf')
+ggplot(runs, aes(x=factor(n), y=CPU_2opt, fill=factor(language))) +
+    geom_boxplot() + labs(x="n", y="2-opt CPU (s)", fill="Language")
+dev.off()
 
 
 
