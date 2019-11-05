@@ -24,18 +24,16 @@ impl TSPSolution {
         while self.first_improvement(&data) { t += 1; }
         return t;
     }
-    //
+    
     fn first_improvement(&mut self, data: &TSPData) -> bool {
-        for p1 in 0..self.nodes.len()-3 {
-            for p2 in p1+2..self.nodes.len()-1 {
-                if data.d(self.nodes[p1], self.nodes[p1+1]) +
-                    data.d(self.nodes[p2], self.nodes[p2+1]) >
-                    data.d(self.nodes[p1], self.nodes[p2]) +
-                    data.d(self.nodes[p1+1], self.nodes[p2+1]) {
-                        for i in 0..((p2-p1+1)/2) {
-                            let tmp = self.nodes[p1+1+i];
-                            self.nodes[p1+1+i] = self.nodes[p2-i];
-                            self.nodes[p2-i] = tmp;
+        for (p1, n1) in self.nodes.windows(2).enumerate() {
+            let (s1, t1) = (n1[0], n1[1]);
+            for (p2, n2) in self.nodes.windows(2).enumerate().skip(p1 + 2) {
+                let (s2, t2) = (n2[0], n2[1]);
+                if data.d(s1, t1) + data.d(s2, t2) >
+                    data.d(s1, s2) + data.d(t1, t2) {
+                        for i in 0..((p2 - p1 + 1) / 2) {
+                            self.nodes.swap(p1 + 1 + i, p2 - i);
                         }
                         return true;
                     }
@@ -43,6 +41,7 @@ impl TSPSolution {
         }
         return false;
     }
+    
 }
 
 fn read_data(fname: &str) -> (TSPData, Vec<TSPSolution>) {
@@ -51,8 +50,7 @@ fn read_data(fname: &str) -> (TSPData, Vec<TSPSolution>) {
     let comm = Regex::new(r"#[^\n]*\n").unwrap();
     let useful_data = comm.replace_all(&data, "");
     // remove newlines
-    let flat = useful_data.replace("\n", " ");
-    let tokens = flat.split(" ");
+    let tokens = useful_data.split_whitespace();
     let mut n: usize = 0;
     let mut nsols: usize = 0;
     let mut d: Vec<u32> = Vec::<u32>::new();
