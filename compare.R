@@ -17,8 +17,12 @@ cpp <- filter(runs, language=='c++')
 runs$reference <- cpp$CPU
 runs$normalised <- runs$CPU_2opt / runs$reference
 
+compared_runs <- subset(runs, !(language %in% c('python', 'javascript',
+                                                'numba', 'pypy', 'java',
+                                                'java-static')))
+
 pdf('language_comparison_relative.pdf')
-ggplot(runs, aes(x=factor(n), y=normalised, fill=factor(language))) +
+ggplot(compared_runs, aes(x=factor(n), y=normalised, fill=factor(language))) +
     geom_boxplot() + labs(x="n", y="2-opt CPU (ratio of C++ CPU)",
                           fill="Language")
 dev.off()
