@@ -1,4 +1,8 @@
+module TSPBenchmark
+
 using CPUTime
+
+export benchmark_many
 
 struct TSPData{ T<:Real }
     n::Int    # number of nodes
@@ -88,12 +92,4 @@ function benchmark_many(dirname::String)
     end
 end
 
-function main(ARGS)
-    if length(ARGS) ≠ 1
-        throw(ArgumentError("USAGE: tspbenchmark.jl tsp_data_file_dir"))
-    else
-        benchmark_many(ARGS[1])
-    end
-end
-
-main(ARGS)
+end # module

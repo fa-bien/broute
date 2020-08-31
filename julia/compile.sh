@@ -1,3 +1,3 @@
 #!/bin/sh
 
-#julia -e "using Pkg; Pkg.add(\"CPUTime\"); using CPUTime" >&2
+julia -e "using Pkg; Pkg.activate(\"TSPBenchmark\"); Pkg.instantiate()" >&2
