@@ -5,6 +5,8 @@ use regex::Regex;
 // for time measurement
 use cpu_time::ProcessTime;
 
+use rustc_version_runtime::version;
+
 struct TSPData {
     n: usize,
     d: Box<[u32]>,
@@ -92,7 +94,7 @@ fn benchmark_one(data: &TSPData, solutions: &mut Vec<TSPSolution>)
     (count, total2opttime)
 }
 
-fn benchmark_many(dirname: &str) {
+fn benchmark_many(dirname: &str, benchmarkname: &str) {
     let paths = fs::read_dir(dirname).unwrap_or_else(|error| {
         panic!("ERROR: {:?}\nDirectory not found: {:?}", error, dirname);
     });
@@ -102,7 +104,8 @@ fn benchmark_many(dirname: &str) {
         let full_name = t.to_str().unwrap();
         let (data, mut solutions) = read_data(full_name);
         let (n, l) = benchmark_one(&data, &mut solutions);
-        println!("rust,{},{},{},{},{}",
+        println!("rust,{},{},{},{},{},{},{}",
+                 version(), benchmarkname,
                  base.file_name().to_str().unwrap(),
                  data.n, solutions.len(), n, l);
     }
@@ -111,7 +114,7 @@ fn benchmark_many(dirname: &str) {
 fn main() {
     let args: Vec<String> = env::args().collect();
     if args.len() == 2 {
-        benchmark_many(&(args[1]));
+        benchmark_many(&(args[1]), "2-opt");
     } else {
         println!("USAGE: {:} dir_name", args[0]);
         println!("{:?}", args.len());

@@ -86,7 +86,9 @@ int main (int argc, char * argv[]) {
 	TSPData<int> data = all_data.first;
 	vector<TSPSolution<int> > solutions = all_data.second;
 	pair<int, double> res = benchmark_one<int>(data, solutions);
-	cout << "c++," << basename(argv[1]) << ","
+	cout << "c++," << COMPILER << " " << __VERSION__ << ","
+	     << "2-opt" << ","
+	     << basename(argv[1]) << ","
 	     << data.n() << ","
 	     << solutions.size() << "," << res.first << "," << res.second
 	     << endl;

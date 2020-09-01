@@ -79,13 +79,14 @@ function benchmark_one(data::TSPData{T}, solutions::Vector{TSPSolution}) where T
     return nimpr, total2opttime
 end
 
-function benchmark_many(dirname::String)
-#    println("#language,instance,n,nsolutions,n_improvements,CPU_2opt")
+function benchmark_many(dirname::String, benchmarkname::String="2-opt")
+#    println("#language,version,benchmark,instance,n,nsolutions,n_improvements,time(s)")
     nimpr = 0
     for fname in readdir(dirname)
         d, sols = read_data(joinpath(dirname, fname), Int)
         n, l = benchmark_one(d, sols)
-        println(join((basename(pwd()), fname, string(d.n),
+        println(join((basename(pwd()), VERSION, benchmarkname, fname,
+                      string(d.n),
                       string(size(sols,1)), string(n), string(l)),
                      ","))
         nimpr += n

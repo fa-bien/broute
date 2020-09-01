@@ -29,26 +29,35 @@ def loadfromfile(fname):
     data = tspdata.TSPData(n, d)
     return data, [tspsolution.TSPSolution(data, x) for x in tours]
 
-# Solve each starting solution with first improvement 2-opt
+# Solve each starting solution using a given benchmark
 # return the CPU time spent
-def benchmarkone(solutions):
+def benchmarkone(solutions, benchmarkname):
+    if benchmarkname == '2-opt':
+        bench = lambda x: x.two_opt()
+    elif benchmarkname == 'LNS':
+        bench = lambda x: x.LNS()
+    else:
+        bench = lambda x: None
+    #
     nimpr = 0
-    total2opttime = 0
-    for sol  in solutions:
+    totalcputime = 0.0
+    for sol in solutions:
         t1 = time.process_time()
-        n = sol.two_opt()
+        n = bench(sol)
         t2 = time.process_time()
-        total2opttime += t2 - t1
+        totalcputime += t2 - t1
         nimpr += n
-    return nimpr, total2opttime
+    return nimpr, totalcputime
 
 # benchmark all input data, dump outcome
-def benchmarkmany(dirname):
-    #print('#language,instance,n,nsolutions,creation_time,CPU_2opt')
+def benchmarkmany(dirname, benchmarkname='2-opt'):
+    #print('language,version,CPU,system,benchmark,instance,n,nsolutions,nimprovements,time(s)')
     for fn in os.listdir(dirname):
         data, solutions = loadfromfile(os.path.join(dirname, fn))
-        nimpr, t = benchmarkone(solutions)
+        nimpr, t = benchmarkone(solutions, benchmarkname)
         print(','.join( (os.path.basename(os.getcwd()),
+                         sys.implementation.name + ' ' + sys.version.split()[0],
+                         benchmarkname,
                          os.path.basename(fn), str(data.n),
                          str(len(solutions)), str(nimpr), str(t))))
         

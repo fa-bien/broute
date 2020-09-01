@@ -1,3 +1,5 @@
 #!/bin/bash
 
-./tspbenchmark.js $1
+version='node '`node --version`
+
+./tspbenchmark.js $1 | sed -e "s/javascript/javascript,$version/g"

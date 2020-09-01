@@ -1,7 +1,7 @@
 #!/bin/bash
 
-(echo "language,instance,n,nsolutions,n_improvements,CPU_2opt"
- for lang in c++ c++-static c++98 julia rust #java java-static numba javascript python pypy
+(echo "language,version,benchmark,instance,n,nsolutions,nimprovements,time(s)"
+ for lang in c++ c++-static c++98 julia rust java java-static numba javascript python pypy
  do
      cd $lang
      [[ -f compile.sh ]] && ./compile.sh

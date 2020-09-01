@@ -52,7 +52,7 @@ read_data(string fname) {
 
 // benchmark all solutions in the given vector
 template<class T> pair<int, double>
-benchmark_one(vector<TSPSolution<T> > solutions) {
+benchmark_one(vector<TSPSolution<T> > solutions, string benchmarkname) {
     int nimpr = 0;
     double total_ls = 0;
     int n;
@@ -79,8 +79,10 @@ int main (int argc, char * argv[]) {
 	auto all_data = read_data<int>(argv[1]);
 	auto data = all_data.first;
 	auto solutions = all_data.second;
-	auto res = benchmark_one<int>(solutions);
-	cout << "c++," << basename(argv[1]) << ","
+	auto res = benchmark_one<int>(solutions, "2-opt");
+	cout << "c++," << COMPILER << " " << __VERSION__ << ","
+	     << "2-opt" << ","
+	     << basename(argv[1]) << ","
 	     << solutions[0].data()->n() << ","
 	     << solutions.size() << "," << res.first << "," << res.second
 	     << endl;

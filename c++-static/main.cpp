@@ -79,7 +79,9 @@ int main (int argc, char * argv[]) {
 	auto data = all_data.first;
 	auto solutions = all_data.second;
 	auto res = benchmark_one<int>(solutions);
-	cout << "c++," << basename(argv[1]) << ","
+	cout << "c++," << COMPILER << " " << __VERSION__ << ","
+	     << "2-opt" << ","
+	     << basename(argv[1]) << ","
 	     << solutions[0].data()->n() << ","
 	     << solutions.size() << "," << res.first << "," << res.second
 	     << endl;

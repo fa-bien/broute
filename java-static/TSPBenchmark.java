@@ -77,7 +77,7 @@ public class TSPBenchmark{
 					 Double.valueOf(totalLS/1e9));
     }
     
-    private static void parse_many(String dirname) {
+    private static void parse_many(String dirname, String benchmarkname) {
 	File folder = new File(dirname);
 	File[] filenames = folder.listFiles();
 	for (int i=0; i < filenames.length; i++) {
@@ -88,7 +88,8 @@ public class TSPBenchmark{
 		TSPData d = allData.getKey();
 		TSPSolution[] solutions = allData.getValue();
 		Pair<Integer, Double> res = parse_one(solutions);
-		System.out.println("java," + basename + "," + d.n() + "," +
+		System.out.println("java," + benchmarkname + "," + basename +
+				   "," + d.n() + "," +
 				   solutions.length + "," + res.getKey()
 				   + "," + res.getValue());
 	    } catch (IOException e) {
@@ -103,6 +104,6 @@ public class TSPBenchmark{
 	    System.exit(2);
 	}
 	// System.out.println("#language,instance,n,nsolutions,n_improvements,CPU_2opt");
-	parse_many(args[0]);
+	parse_many(args[0], "2-opt");
     }
 }

@@ -84,14 +84,15 @@ function benchmarkOne(solutions) {
     return [nimpr, total2optTime];
 }
 
-function benchmarkMany(dirname) {
+function benchmarkMany(dirname, benchmarkname) {
     var fs = require('fs');
     fs.readdir(dirname, (err, entries) => {
 	entries.forEach(fname => {
 	    var path = [dirname, fname].join('/');
 	    var [data, solutions] = readData(path);
 	    var res = benchmarkOne(solutions);
-	    console.log(['javascript', fname, data.n, solutions.length,
+	    console.log(['javascript', benchmarkname, fname,
+			 data.n, solutions.length,
 			 res[0], res[1]].join());
 	});
     });
@@ -101,7 +102,7 @@ function main(args) {
     if (args.length != 3) {
 	console.log('USAGE:', args[1], 'tsp_data_file_dir');
     } else {
-	benchmarkMany(args[2]);
+	benchmarkMany(args[2], '2-opt');
     }
 }
 

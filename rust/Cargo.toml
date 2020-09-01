@@ -9,3 +9,4 @@ edition = "2018"
 [dependencies]
 regex = "1"
 cpu-time = "*"
+rustc_version_runtime = "0.1.*"
