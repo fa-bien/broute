@@ -36,6 +36,8 @@ def benchmarkone(solutions, benchmarkname):
         bench = lambda x: x.two_opt()
     elif benchmarkname == 'LNS':
         bench = lambda x: x.LNS()
+    elif benchmarkname == 'Or-opt':
+        bench = lambda x: x.or_opt()
     else:
         bench = lambda x: None
     #
@@ -62,8 +64,10 @@ def benchmarkmany(dirname, benchmarkname='2-opt'):
                          str(len(solutions)), str(nimpr), str(t))))
         
 if __name__ == '__main__':
-    if len(sys.argv) != 2:
-        sys.stderr.write('USAGE: ' + sys.argv[0] + ' tsp_data_file_dir\n')
+    if len(sys.argv) < 2:
+        sys.stderr.write('USAGE: ' + sys.argv[0] + \
+                         ' tsp_data_file_dir [benchmark]\n')
         sys.exit(9)
     else:
-        t = benchmarkmany(sys.argv[1])
+        benchmark = '2-opt' if len(sys.argv) == 2 else sys.argv[2]
+        t = benchmarkmany(sys.argv[1], benchmark)
