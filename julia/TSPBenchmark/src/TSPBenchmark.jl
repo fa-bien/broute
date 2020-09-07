@@ -45,13 +45,13 @@ end
 
 function two_opt(data::TSPData{T}, sol::TSPSolution) where T
     t = 0
-    while first_improvement(data, sol)
+    while first2eimprovement(data, sol)
         t += 1
     end
     return t
 end
 
-function first_improvement(d::TSPData{T}, sol::TSPSolution) where T
+function first2eimprovement(d::TSPData{T}, sol::TSPSolution) where T
     for p1 in 1:length(sol.tour)-3, p2 in p1+2:length(sol.tour)-1
         if d.d[sol.tour[p1], sol.tour[p1+1]] +
             d.d[sol.tour[p2], sol.tour[p2+1]] >
@@ -68,15 +68,53 @@ function first_improvement(d::TSPData{T}, sol::TSPSolution) where T
     return false
 end
 
-function benchmark_one(data::TSPData{T}, solutions::Vector{TSPSolution}) where T
-    total2opttime = 0.0
+function or_opt(data::TSPData{T}, sol::TSPSolution) where T
+    t = 0
+    while firstorimprovement(data, sol)
+        t += 1
+    end
+    return t
+end
+
+function firstorimprovement(d::TSPData{T}, s::TSPSolution) where T
+    for i in 2:length(s.tour)-1, l in 1:(min(3, length(s.tour)-i)),
+        p in [ 1:i-2 ; i+l:length(s.tour)-1 ]
+        #
+        δ = d.d[s.tour[i-1], s.tour[i+l]] + d.d[s.tour[p], s.tour[i]] +
+            d.d[s.tour[i+l-1], s.tour[p+1]] -
+            d.d[s.tour[p], s.tour[p+1]] - d.d[s.tour[i-1], s.tour[i]] -
+            d.d[s.tour[i+l-1], s.tour[i+l]]
+        # improvement found
+        if δ < 0
+            if i < p
+                s.tour = [ s.tour[1:i-1] ; s.tour[i+l:p] ; s.tour[i:i+l-1] ;
+                           s.tour[p+1:end] ]
+            else
+                s.tour = [ s.tour[1:p] ; s.tour[i:i+l-1] ; s.tour[p+1:i-1] ;
+                           s.tour[i+l:end] ]
+            end
+            return true
+        end
+    end
+    return false
+end
+
+function benchmark_one(data::TSPData{T}, solutions::Vector{TSPSolution},
+                       benchmarkname::String) where T
+    totaltime = 0.0
     nimpr = 0
     for s in solutions
-        t = @CPUelapsed n = two_opt(data, s)
-        total2opttime += t
+        if benchmarkname == "2-opt"
+            t = @CPUelapsed n = two_opt(data, s)
+        elseif lowercase(benchmarkname) == "or-opt"
+            t = @CPUelapsed n = or_opt(data, s)
+        else
+            throw(ArgumentError("Unknown benchmark: $benchmarkname"))
+        end
+        totaltime += t
         nimpr += n
     end
-    return nimpr, total2opttime
+    return nimpr, totaltime
 end
 
 function benchmark_many(dirname::String, benchmarkname::String="2-opt")
@@ -84,7 +122,7 @@ function benchmark_many(dirname::String, benchmarkname::String="2-opt")
     nimpr = 0
     for fname in readdir(dirname)
         d, sols = read_data(joinpath(dirname, fname), Int)
-        n, l = benchmark_one(d, sols)
+        n, l = benchmark_one(d, sols, benchmarkname)
         println(join((basename(pwd()), VERSION, benchmarkname, fname,
                       string(d.n),
                       string(size(sols,1)), string(n), string(l)),

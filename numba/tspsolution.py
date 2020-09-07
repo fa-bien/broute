@@ -1,7 +1,8 @@
-import tspdata
+import itertools as it
 import numpy as np
-
 from numba import jit
+
+import tspdata
 
 class TSPSolution:
     def __init__(self, data, permutation):
@@ -10,17 +11,28 @@ class TSPSolution:
 
     def two_opt(self):
         t = 0
-        while self.firstimprovement():
+        while self.first2eimprovement():
             t += 1
         return t
 
-    def firstimprovement(self):
+    def first2eimprovement(self):
         # actually speeds things up!
         tour, d = self.nodes, self.data.d
-        return aux(tour, d)
+        return aux_2opt(tour, d)
 
+    def or_opt(self):
+        t = 0
+        while self.firstorimprovement():
+            t += 1
+        return t
+        
+    def firstorimprovement(self):
+        # actually speeds things up!
+        tour, d = self.nodes, self.data.d
+        return aux_oropt(tour, d)
+    
 @jit(nopython=True)
-def aux(tour, d):
+def aux_2opt(tour, d):
     for p1 in range(len(tour) - 3):
         for p2 in range(p1+2, len(tour) - 1):
             if d[tour[p1]][tour[p1+1]] + d[tour[p2]][tour[p2+1]] > \
@@ -29,4 +41,28 @@ def aux(tour, d):
                 for i in range((p2-p1+1) // 2):
                     tour[p1+1+i], tour[p2-i] = tour[p2-i], tour[p1+1+i]
                 return True
+    return False
+
+@jit(nopython=True)
+def aux_oropt(tour, d):
+    for i in range(1, len(tour) - 1):
+        for l in range(1, 1 + min(3, len(tour)-1-i)):
+            for tmp in (range(i-1), range(i+l, len(tour)-1)):
+                for pos in tmp:
+                    delta = d[tour[i-1]][tour[i+l]] + d[tour[pos]][tour[i]] + \
+                        d[tour[i+l-1]][tour[pos+1]] - d[tour[pos]][tour[pos+1]]\
+                        - d[tour[i-1]][tour[i]] - d[tour[i+l-1]][tour[i+l]]
+                    # perform improving move
+                    if delta < 0:
+                        if i < pos:
+                            tour = np.hstack((tour[:i],
+                                              tour[i+l:pos+1],
+                                              tour[i:i+l],
+                                              tour[pos+1:]))
+                        else:
+                            tour = np.hstack((tour[0:pos+1],
+                                              tour[i:i+l],
+                                              tour[pos+1:i],
+                                              tour[i+l:]))
+                    return True
     return False

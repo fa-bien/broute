@@ -1,3 +1,3 @@
 #!/bin/bash
 
-pypy3 ./tspbenchmark.py $1
+pypy3 ./tspbenchmark.py $1 $2

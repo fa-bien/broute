@@ -62,8 +62,8 @@ def benchmarkmany(dirname, benchmarkname='2-opt'):
                          benchmarkname,
                          os.path.basename(fn), str(data.n),
                          str(len(solutions)), str(nimpr), str(t))))
-        
-if __name__ == '__main__':
+
+def main():
     if len(sys.argv) < 2:
         sys.stderr.write('USAGE: ' + sys.argv[0] + \
                          ' tsp_data_file_dir [benchmark]\n')
@@ -71,3 +71,6 @@ if __name__ == '__main__':
     else:
         benchmark = '2-opt' if len(sys.argv) == 2 else sys.argv[2]
         t = benchmarkmany(sys.argv[1], benchmark)
+    
+if __name__ == '__main__':
+    main()
