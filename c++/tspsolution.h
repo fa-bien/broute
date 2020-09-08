@@ -48,22 +48,31 @@ protected:
 		for (unsigned int p=0; p < i-1; p++) {
 		    int delta = or_delta(i, l, p);
 		    if (delta < 0) {
-			for (unsigned int j=0; j < l; j++) {
-			    int t = *(nodes_.begin() + i + j);
-			    nodes_.erase(nodes_.begin() + i + j);
-			    nodes_.insert(nodes_.begin() + p + 1 + j, t);
-			}
+
+			// first copy sequence we want to move
+			int *t = new int[l];
+			for(unsigned int j=0; j < l; j++) { t[j] = nodes_[i+j]; }
+			// next move around what will end up being right of it
+			for(unsigned int j=i-1; j > p; j--) { nodes_[j+l] = nodes_[j]; }
+			// finally write in the sequence being moved
+			for(unsigned int j=0; j < l; j++) { nodes_[p+1+j] = t[j]; }
+			
 			return true;
 		    }
 		}
 		for (unsigned int p=i+l; p < nodes_.size() - 1; p++) {
 		    int delta = or_delta(i, l, p);
 		    if (delta < 0) {
-			nodes_.insert(nodes_.begin() + p + 1,
-				      nodes_.begin() + i,
-				      nodes_.begin() + i + l);
-			nodes_.erase(nodes_.begin() + i,
-				     nodes_.begin() + i + l);
+
+			// first copy sequence we want to move
+			int *t = new int[l];
+			for(unsigned int j=0; j < l; j++) { t[j] = nodes_[i+j]; }
+			// next move around what will end up being left of it
+			for(unsigned int j=i+l; j <= p; j++) { nodes_[j-l] = nodes_[j]; }
+			// finally write in the sequence being moved
+			for (unsigned int j=0; j < l; j++) { nodes_[p+1+j-l] = t[j]; }
+			
+			
 			return true;
 		    }
 		}
