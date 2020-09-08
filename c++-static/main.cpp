@@ -51,13 +51,20 @@ read_data(string fname) {
 
 // benchmark all solutions in the given vector
 template<class T> pair<int, double>
-benchmark_one(vector<TSPSolution<T> > solutions) {
+benchmark_one(vector<TSPSolution<T> > solutions, const string benchmarkname) {
     int nimpr = 0;
     double total_ls = 0;
     int n;
     for (unsigned int i=0; i < solutions.size(); i++) {
 	clock_t t2 = clock();
-	n = solutions[i].two_opt();
+	if (benchmarkname == "2-opt") {
+	    n = solutions[i].two_opt();
+	} else if (benchmarkname == "Or-opt") {
+	    n = solutions[i].or_opt();
+	} else {
+	    cerr << "Unknown benchmark: " << benchmarkname << endl;
+	    exit(2);
+	}
 	clock_t t3 = clock();
 	total_ls += ((double)(t3-t2)) / CLOCKS_PER_SEC;
 	nimpr += n;
@@ -78,7 +85,11 @@ int main (int argc, char * argv[]) {
 	auto all_data = read_data<int>(argv[1]);
 	auto data = all_data.first;
 	auto solutions = all_data.second;
-	auto res = benchmark_one<int>(solutions);
+	string benchmarkname = "2-opt";
+	if (argc > 2) {
+	    benchmarkname = argv[2];
+	}
+	auto res = benchmark_one<int>(solutions, benchmarkname);
 	cout << "c++," << COMPILER << " " << __VERSION__ << ","
 	     << "2-opt" << ","
 	     << basename(argv[1]) << ","
