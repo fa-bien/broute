@@ -57,13 +57,21 @@ read_data(string fname) {
 
 // benchmark all solutions in the given vector
 template<class T> pair<int, double>
-benchmark_one(const TSPData<T> &data, vector<TSPSolution<T> > solutions) {
+benchmark_one(const TSPData<T> &data, vector<TSPSolution<T> > solutions,
+	      string benchmarkname) {
     int nimpr = 0;
     double total_ls = 0;
     int n;
     for (unsigned int i=0; i < solutions.size(); i++) {
 	clock_t t2 = clock();
-	n = solutions[i].two_opt(data);
+	if (benchmarkname == "2-opt") {
+	    n = solutions[i].two_opt(data);
+	} else if (benchmarkname == "Or-opt") {
+	    n = solutions[i].or_opt(data);
+	} else {
+	    cerr << "Unknown benchmark: " << benchmarkname << endl;
+	    exit(2);
+	}
 	clock_t t3 = clock();
 	total_ls += ((double)(t3-t2)) / CLOCKS_PER_SEC;
 	nimpr += n;
@@ -78,14 +86,19 @@ string basename(string fname) {
 
 int main (int argc, char * argv[]) {
     if (argc < 2) {
-	cerr << "USAGE: " << argv[0] << " tsp_data_file" << endl;
+	cerr << "USAGE: " << argv[0] << " tsp_data_file [benchmark]" << endl;
 	exit(0);
     } else {
 	pair<TSPData<int>, vector<TSPSolution<int> > > all_data =
 	    read_data<int>(argv[1]);
+	string benchmarkname = "2-opt";
+	if (argc > 2) {
+	    benchmarkname = argv[2];
+	}
 	TSPData<int> data = all_data.first;
 	vector<TSPSolution<int> > solutions = all_data.second;
-	pair<int, double> res = benchmark_one<int>(data, solutions);
+	pair<int, double> res = benchmark_one<int>(data, solutions,
+						   benchmarkname);
 	cout << "c++," << COMPILER << " " << __VERSION__ << ","
 	     << "2-opt" << ","
 	     << basename(argv[1]) << ","
