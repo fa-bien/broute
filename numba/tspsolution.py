@@ -55,14 +55,16 @@ def aux_oropt(tour, d):
                     # perform improving move
                     if delta < 0:
                         if i < pos:
-                            tour = np.hstack((tour[:i],
-                                              tour[i+l:pos+1],
-                                              tour[i:i+l],
-                                              tour[pos+1:]))
+                            nt = np.hstack((tour[:i],
+                                            tour[i+l:pos+1],
+                                            tour[i:i+l],
+                                            tour[pos+1:]))
                         else:
-                            tour = np.hstack((tour[0:pos+1],
-                                              tour[i:i+l],
-                                              tour[pos+1:i],
-                                              tour[i+l:]))
-                    return True
+                            nt = np.hstack((tour[0:pos+1],
+                                            tour[i:i+l],
+                                            tour[pos+1:i],
+                                            tour[i+l:]))
+                        #
+                        tour[:] = nt
+                        return True
     return False

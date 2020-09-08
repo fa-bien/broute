@@ -35,6 +35,7 @@ class TSPSolution:
     def firstorimprovement(self):
         # actually speeds things up!
         tour, d = self.nodes, self.data.d
+        print('\nTour:  ', tour)
         for i in range(1, len(tour) - 1):
             for l in range(1, 1 + min(3, len(tour)-1-i)):
                 for pos in chain(range(i-1), range(i+l, len(tour)-1)):
@@ -43,6 +44,8 @@ class TSPSolution:
                         - d[tour[i-1]][tour[i]] - d[tour[i+l-1]][tour[i+l]]
                     # perform improving move
                     if delta < 0:
+                        print(' * i =', i, '\tl =', l, '\tp =', pos)
+                        print('\tdelta =', delta)
                         if i < pos:
                             self.nodes = self.nodes[:i] + \
                                 self.nodes[i+l:pos+1] + \
@@ -53,6 +56,10 @@ class TSPSolution:
                                 self.nodes[i:i+l] + \
                                 self.nodes[pos+1:i] + \
                                 self.nodes[i+l:]
+                        print('After:', self.nodes)
+                        if i > pos:
+                            import sys
+                            sys.exit(9)
                         return True
         return False
 
