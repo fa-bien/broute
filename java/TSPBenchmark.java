@@ -67,7 +67,7 @@ public class TSPBenchmark{
 	int nimpr = 0;
 	long totalLS = 0;
 	long t1, t2;
-	int n=0;
+	int n = 0;
 	for (int i=0; i < solutions.length; i++) {
 	    t1 = System.nanoTime();
 	    if (benchmarkname.equals("2-opt")) {

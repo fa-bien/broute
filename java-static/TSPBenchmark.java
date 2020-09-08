@@ -61,14 +61,22 @@ public class TSPBenchmark{
 	return new Pair<TSPData, TSPSolution[]>(data, solutions);
     }
     
-    private static Pair<Integer, Double> parse_one(TSPSolution[] solutions) {
+    private static Pair<Integer, Double> benchmark_one(TSPSolution[] solutions,
+						       String benchmarkname){
 	int nimpr = 0;
 	long totalLS = 0;
 	long t1, t2;
-	int n;
+	int n = 0;
 	for (int i=0; i < solutions.length; i++) {
 	    t1 = System.nanoTime();
-	    n = solutions[i].two_opt();
+	    if (benchmarkname.equals("2-opt")) {
+		n = solutions[i].two_opt();
+	    } else if (benchmarkname.equals("Or-opt")) {
+		n = solutions[i].or_opt();
+	    } else {
+		System.err.println("Unknown benchmark: <" + benchmarkname +">");
+		System.exit(2);
+	    }
 	    t2 = System.nanoTime();
 	    totalLS += t2 - t1;
 	    nimpr += n;
@@ -77,7 +85,7 @@ public class TSPBenchmark{
 					 Double.valueOf(totalLS/1e9));
     }
     
-    private static void parse_many(String dirname, String benchmarkname) {
+    private static void benchmark_many(String dirname, String benchmarkname) {
 	File folder = new File(dirname);
 	File[] filenames = folder.listFiles();
 	for (int i=0; i < filenames.length; i++) {
@@ -87,7 +95,8 @@ public class TSPBenchmark{
 		Pair<TSPData, TSPSolution[]> allData = loadFromFile(fname);
 		TSPData d = allData.getKey();
 		TSPSolution[] solutions = allData.getValue();
-		Pair<Integer, Double> res = parse_one(solutions);
+		Pair<Integer, Double> res = benchmark_one(solutions,
+							  benchmarkname);
 		System.out.println("java," + benchmarkname + "," + basename +
 				   "," + d.n() + "," +
 				   solutions.length + "," + res.getKey()
@@ -99,11 +108,15 @@ public class TSPBenchmark{
     }
     
     public static void main(String[] args) {
-	if (args.length != 1) {
+	if (args.length < 1) {
 	    System.err.println("USAGE: java TSPBenchmark tsp_data_directory");
 	    System.exit(2);
 	}
+	String benchmarkname = "2-opt";
+	if (args.length > 1) {
+	    benchmarkname = args[1];
+	}
 	// System.out.println("#language,instance,n,nsolutions,n_improvements,CPU_2opt");
-	parse_many(args[0], "2-opt");
+	benchmark_many(args[0], benchmarkname);
     }
 }
