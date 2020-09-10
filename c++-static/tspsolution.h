@@ -50,11 +50,14 @@ protected:
 		for (int p=0; p < i-1; p++) {
 		    int delta = or_delta(i, l, p);
 		    if (delta < 0) {
+			// first copy sequence we want to move
 			int *t = new int[l];
 			memcpy(t, nodes_ + i, l * sizeof(int));
+			// next move around what will end up being right of it
 			memmove(nodes_ + p + l + 1,
 				nodes_ + p + 1,
 				(i - p - 1)* sizeof(int));
+			// finally write in the sequence being moved
 			memcpy(nodes_ + p + 1, t, l * sizeof(int));
 			return true;
 		    }
@@ -62,10 +65,13 @@ protected:
 		for (int p=i+l; p < size_ - 1; p++) {
 		    int delta = or_delta(i, l, p);
 		    if (delta < 0) {
+			// first copy sequence we want to move
 			int *t = new int[l];
 			memcpy(t, nodes_ + i, l * sizeof(int));
+			// next move around what will end up being left of it
 			memmove(nodes_ + i, nodes_ + i + l,
 				(p + 1 - (i + l)) * sizeof(int));
+			// finally write in the sequence being moved
 			memcpy(nodes_ + p + 1 - l, t, l * sizeof(int)); 
 			return true;
 		    }
