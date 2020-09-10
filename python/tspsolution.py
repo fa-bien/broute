@@ -37,28 +37,56 @@ class TSPSolution:
         tour, d = self.nodes, self.data.d
         for i in range(1, len(tour) - 1):
             for l in range(1, 1 + min(3, len(tour)-1-i)):
-                for pos in chain(range(i-1), range(i+l, len(tour)-1)):
-                    delta = d[tour[i-1]][tour[i+l]] + d[tour[pos]][tour[i]] + \
-                        d[tour[i+l-1]][tour[pos+1]] - d[tour[pos]][tour[pos+1]]\
+                for p in chain(range(i-1), range(i+l, len(tour)-1)):
+                    delta = d[tour[i-1]][tour[i+l]] + d[tour[p]][tour[i]] + \
+                        d[tour[i+l-1]][tour[p+1]] - d[tour[p]][tour[p+1]]\
                         - d[tour[i-1]][tour[i]] - d[tour[i+l-1]][tour[i+l]]
                     # perform improving move
                     if delta < 0:
-                        if i < pos:
-                            self.nodes = self.nodes[:i] + \
-                                self.nodes[i+l:pos+1] + \
-                                self.nodes[i:i+l] + \
-                                self.nodes[pos+1:]
+                        # store sequence to move
+                        t = [ x for x in self.nodes[i:i+l] ]
+                        if i < p:
+                            # shift stuff left
+                            for j in range(i, p-l+1):
+                                self.nodes[j] = self.nodes[j+l]
+                            # copy sequence right of the stuff 
+                            for j in range(l):
+                                self.nodes[p+1+j-l] = t[j]
                         else:
-                            self.nodes = self.nodes[0:pos+1] + \
-                                self.nodes[i:i+l] + \
-                                self.nodes[pos+1:i] + \
-                                self.nodes[i+l:]
-                        if i > pos:
-                            import sys
-                            sys.exit(9)
+                            # shift stuff right
+                            for j in range(i-1, p, -1):
+                                self.nodes[j+l] = self.nodes[j]
+                            # copy sequence right of the stuff 
+                            for j in range(l):
+                                self.nodes[p+1+j] = t[j]
                         return True
         return False
 
+    # old implementation, similar time performance but more allocations
+    # def firstorimprovement(self):
+    #     # actually speeds things up!
+    #     tour, d = self.nodes, self.data.d
+    #     for i in range(1, len(tour) - 1):
+    #         for l in range(1, 1 + min(3, len(tour)-1-i)):
+    #             for pos in chain(range(i-1), range(i+l, len(tour)-1)):
+    #                 delta = d[tour[i-1]][tour[i+l]] + d[tour[pos]][tour[i]] + \
+    #                     d[tour[i+l-1]][tour[pos+1]] - d[tour[pos]][tour[pos+1]]\
+    #                     - d[tour[i-1]][tour[i]] - d[tour[i+l-1]][tour[i+l]]
+    #                 # perform improving move
+    #                 if delta < 0:
+    #                     if i < pos:
+    #                         self.nodes = self.nodes[:i] + \
+    #                             self.nodes[i+l:pos+1] + \
+    #                             self.nodes[i:i+l] + \
+    #                             self.nodes[pos+1:]
+    #                     else:
+    #                         self.nodes = self.nodes[0:pos+1] + \
+    #                             self.nodes[i:i+l] + \
+    #                             self.nodes[pos+1:i] + \
+    #                             self.nodes[i+l:]
+    #                     return True
+    #     return False
+    
     def cost(self):
         total = 0
         for i, j in zip(self.nodes[:-1], self.nodes[1:]):
