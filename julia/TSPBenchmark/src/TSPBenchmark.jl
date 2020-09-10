@@ -86,18 +86,52 @@ function firstorimprovement(d::TSPData{T}, s::TSPSolution) where T
             d.d[s.tour[i+l-1], s.tour[i+l]]
         # improvement found
         if δ < 0
+            seq = [ k for k in s.tour[i:i+l-1] ]
             if i < p
-                s.tour = [ s.tour[1:i-1] ; s.tour[i+l:p] ; s.tour[i:i+l-1] ;
-                           s.tour[p+1:end] ]
+                for j in i:p-l
+                    s.tour[j] = s.tour[j+l]
+                end
+                for j in 1:l
+                    s.tour[p+j-l] = seq[j]
+                end
             else
-                s.tour = [ s.tour[1:p] ; s.tour[i:i+l-1] ; s.tour[p+1:i-1] ;
-                           s.tour[i+l:end] ]
+                for j in i-1:-1:p+1
+                    s.tour[j+l] = s.tour[j]
+                end
+                for j in 1:l
+                    s.tour[p+j] = seq[j]
+                end
             end
             return true
         end
     end
     return false
 end
+
+# old less efficient version
+
+# function firstorimprovement(d::TSPData{T}, s::TSPSolution) where T
+#     for i in 2:length(s.tour)-1, l in 1:(min(3, length(s.tour)-i)),
+#         p in [ 1:i-2 ; i+l:length(s.tour)-1 ]
+#         #
+#         δ = d.d[s.tour[i-1], s.tour[i+l]] + d.d[s.tour[p], s.tour[i]] +
+#             d.d[s.tour[i+l-1], s.tour[p+1]] -
+#             d.d[s.tour[p], s.tour[p+1]] - d.d[s.tour[i-1], s.tour[i]] -
+#             d.d[s.tour[i+l-1], s.tour[i+l]]
+#         # improvement found
+#         if δ < 0
+#             if i < p
+#                 s.tour = [ s.tour[1:i-1] ; s.tour[i+l:p] ; s.tour[i:i+l-1] ;
+#                            s.tour[p+1:end] ]
+#             else
+#                 s.tour = [ s.tour[1:p] ; s.tour[i:i+l-1] ; s.tour[p+1:i-1] ;
+#                            s.tour[i+l:end] ]
+#             end
+#             return true
+#         end
+#     end
+#     return false
+# end
 
 function benchmark_one(data::TSPData{T}, solutions::Vector{TSPSolution},
                        benchmarkname::String) where T
