@@ -1,6 +1,7 @@
 #!/bin/bash
 
 languages='c++ c++-static c++98 julia rust java java-static numba javascript python pypy'
+languages='c++ c++-static c++98 julia rust java'
 benchmarks='2-opt Or-opt'
 
 (echo "language,version,benchmark,instance,n,nsolutions,checksum,time"
