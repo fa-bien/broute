@@ -100,7 +100,7 @@ int main (int argc, char * argv[]) {
 	pair<int, double> res = benchmark_one<int>(data, solutions,
 						   benchmarkname);
 	cout << "c++," << COMPILER << " " << __VERSION__ << ","
-	     << "2-opt" << ","
+	     << benchmarkname << ","
 	     << basename(argv[1]) << ","
 	     << data.n() << ","
 	     << solutions.size() << "," << res.first << "," << res.second

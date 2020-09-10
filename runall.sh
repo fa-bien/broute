@@ -1,10 +1,16 @@
 #!/bin/bash
 
-(echo "language,version,benchmark,instance,n,nsolutions,nimprovements,time(s)"
- for lang in c++ c++-static c++98 julia rust java java-static numba javascript python pypy
+languages='c++ c++-static c++98 julia rust java java-static numba javascript python pypy'
+benchmarks='2-opt Or-opt'
+
+(echo "language,version,benchmark,instance,n,nsolutions,checksum,time"
+ for lang in $languages
  do
      cd $lang
      [[ -f compile.sh ]] && ./compile.sh
-     ./run_benchmark.sh ../instances
+     for bench in $benchmarks
+     do
+	 ./run_benchmark.sh ../instances $bench
+     done
      cd ..
  done) > allruns.csv
