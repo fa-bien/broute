@@ -31,7 +31,7 @@ class TSPSolution:
         while self.firstorimprovement():
             t += 1
         return t
-        
+
     def firstorimprovement(self):
         # actually speeds things up!
         tour, d = self.nodes, self.data.d
@@ -44,48 +44,19 @@ class TSPSolution:
                     # perform improving move
                     if delta < 0:
                         # store sequence to move
-                        t = [ x for x in self.nodes[i:i+l] ]
+                        t = [ x for x in tour[i:i+l] ]
                         if i < p:
                             # shift stuff left
-                            for j in range(i, p-l+1):
-                                self.nodes[j] = self.nodes[j+l]
-                            # copy sequence right of the stuff 
-                            for j in range(l):
-                                self.nodes[p+1+j-l] = t[j]
+                            tour[i:p-l+1] = tour[i+l:p+1]
+                            # copy sequence right of the stuff
+                            tour[p+1-l:p+1] = t[:]
                         else:
                             # shift stuff right
-                            for j in range(i-1, p, -1):
-                                self.nodes[j+l] = self.nodes[j]
-                            # copy sequence right of the stuff 
-                            for j in range(l):
-                                self.nodes[p+1+j] = t[j]
+                            tour[i-1+l:p+l:-1] = tour[i-1:p:-1]
+                            # copy sequence right of the stuff
+                            tour[p+1:p+1+l] = t[:]
                         return True
         return False
-
-    # old implementation, similar time performance but more allocations
-    # def firstorimprovement(self):
-    #     # actually speeds things up!
-    #     tour, d = self.nodes, self.data.d
-    #     for i in range(1, len(tour) - 1):
-    #         for l in range(1, 1 + min(3, len(tour)-1-i)):
-    #             for pos in chain(range(i-1), range(i+l, len(tour)-1)):
-    #                 delta = d[tour[i-1]][tour[i+l]] + d[tour[pos]][tour[i]] + \
-    #                     d[tour[i+l-1]][tour[pos+1]] - d[tour[pos]][tour[pos+1]]\
-    #                     - d[tour[i-1]][tour[i]] - d[tour[i+l-1]][tour[i+l]]
-    #                 # perform improving move
-    #                 if delta < 0:
-    #                     if i < pos:
-    #                         self.nodes = self.nodes[:i] + \
-    #                             self.nodes[i+l:pos+1] + \
-    #                             self.nodes[i:i+l] + \
-    #                             self.nodes[pos+1:]
-    #                     else:
-    #                         self.nodes = self.nodes[0:pos+1] + \
-    #                             self.nodes[i:i+l] + \
-    #                             self.nodes[pos+1:i] + \
-    #                             self.nodes[i+l:]
-    #                     return True
-    #     return False
     
     def cost(self):
         total = 0

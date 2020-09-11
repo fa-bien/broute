@@ -2,6 +2,8 @@
 
 languages='c++ c++-static c++98 julia rust java java-static numba javascript python pypy'
 languages='c++ c++-static c++98 julia rust java'
+languages='c++ python pypy'
+
 benchmarks='2-opt Or-opt'
 
 (echo "language,version,benchmark,instance,n,nsolutions,checksum,time"
