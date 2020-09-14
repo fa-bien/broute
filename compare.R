@@ -5,21 +5,21 @@ all_runs <- read.csv('allruns.csv')
 
 languages <- c('c++', 'c++98', 'c++-static', 'julia', 'rust',
                'java', 'java-static', 'python', 'numba', 'pypy')
-languages  <- c('c++', 'julia', 'rust', 'c++98')
+languages  <- c('c++', 'c++-nested')
 
 benchmarks <- c('2-opt', 'Or-opt')
 
 for(bench in benchmarks) {
     runs <- subset(all_runs, (language %in% languages) & benchmark == bench)
     
-    ## All runtimes in seconds
-    pdf(paste0('language_comparison_absolute_', bench, '.pdf'))
-    p  <- ggplot(runs, aes(x=factor(n), y=time, fill=factor(language))) +
-        geom_boxplot() + labs(x='n', y='CPU time (s)', fill='Language',
-                              title=paste('Absolute CPU time for', bench,
-                                          'benchmark'))
-    print(p)
-    dev.off()
+    ## ## All runtimes in seconds
+    ## pdf(paste0('language_comparison_absolute_', bench, '.pdf'))
+    ## p  <- ggplot(runs, aes(x=factor(n), y=time, fill=factor(language))) +
+    ##     geom_boxplot() + labs(x='n', y='CPU time (s)', fill='Language',
+    ##                           title=paste('Absolute CPU time for', bench,
+    ##                                       'benchmark'))
+    ## print(p)
+    ## dev.off()
     
     ## All runtimes as a ratio of C++ run time
     runs <- arrange(runs, language, instance)
