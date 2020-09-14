@@ -39,22 +39,24 @@ class TSPSolution:
         tour, d = self.nodes, self.data.d
         for i in range(1, len(tour) - 1):
             for l in range(1, 1 + min(3, len(tour)-1-i)):
-                for pos in chain(range(i-1), range(i+l, len(tour)-1)):
-                    delta = d[tour[i-1]][tour[i+l]] + d[tour[pos]][tour[i]] + \
-                        d[tour[i+l-1]][tour[pos+1]] - d[tour[pos]][tour[pos+1]]\
+                for p in chain(range(i-1), range(i+l, len(tour)-1)):
+                    delta = d[tour[i-1]][tour[i+l]] + d[tour[p]][tour[i]] + \
+                        d[tour[i+l-1]][tour[p+1]] - d[tour[p]][tour[p+1]]\
                         - d[tour[i-1]][tour[i]] - d[tour[i+l-1]][tour[i+l]]
                     # perform improving move
                     if delta < 0:
-                        if i < pos:
-                            self.nodes = np.hstack((self.nodes[:i],
-                                                    self.nodes[i+l:pos+1],
-                                                    self.nodes[i:i+l],
-                                                    self.nodes[pos+1:]))
+                        # store sequence to move
+                        t = np.array([ x for x in tour[i:i+l] ])
+                        if i < p:
+                            # shift stuff left
+                            tour[i:p-l+1] = tour[i+l:p+1]
+                            # copy sequence right of the stuff
+                            tour[p+1-l:p+1] = t[:]
                         else:
-                            self.nodes = np.hstack((self.nodes[0:pos+1],
-                                                    self.nodes[i:i+l],
-                                                    self.nodes[pos+1:i],
-                                                    self.nodes[i+l:]))
+                            # shift stuff right
+                            tour[i-1+l:p+l:-1] = tour[i-1:p:-1]
+                            # copy sequence right of the stuff
+                            tour[p+1:p+1+l] = t[:]
                         return True
         return False
     
