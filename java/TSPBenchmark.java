@@ -28,7 +28,7 @@ public class TSPBenchmark{
 	int nsols = 0;
 	int drow=0, srow=0;
 	int n=0;
-	int[][] d = new int[0][0];;
+	int[] d = new int[0];;
 	ArrayList<ArrayList<Integer> > tours =
 	    new ArrayList<ArrayList<Integer> >();
 	while((s = br.readLine()) != null) {
@@ -38,12 +38,12 @@ public class TSPBenchmark{
 	    if (st.countTokens() == 0) continue;
 	    else if (n == 0 && st.countTokens() == 2) {
 		n = Integer.parseInt(st.nextToken());
-		d = new int[n][n];
+		d = new int[n*n];
 		nsols = Integer.parseInt(st.nextToken());
 	    } else if (drow < n) {
 		int col = 0;
 		while (st.hasMoreTokens()) {
-		    d[drow][col++] = Integer.parseInt(st.nextToken());
+		    d[n*drow+col++] = Integer.parseInt(st.nextToken());
 		}
 		drow += 1;
 	    } else if (srow < nsols) {

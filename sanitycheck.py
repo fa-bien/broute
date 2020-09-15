@@ -11,8 +11,6 @@ def loadCSV(fname):
     columns = lines[0].rstrip().split(',')
     column_index = { col: index
                      for (index, col) in enumerate(columns) }
-    print(columns)
-    print(column_index)
     # now actually read rows of experimental data
     for line in lines[1:]:
         tokens = line.rstrip().split(',')
