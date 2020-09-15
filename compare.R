@@ -1,16 +1,26 @@
 library(dplyr)
 library(ggplot2)
 
-all_runs <- read.csv('allruns.csv')
-
 languages <- c('c++', 'c++98', 'c++-static', 'julia', 'rust',
                'java', 'java-static', 'python', 'numba', 'pypy')
-languages  <- c('c++', 'c++-nested', 'c++-hybrid-matrix')
+languages  <- c('c++', 'julia', 'julia-flat-matrix', 'julia-flat-static-matrix')
 
 benchmarks <- c('2-opt', 'Or-opt')
 
+## first we glue all data together in one data frame
+fnames <- paste0(languages, '-runs.csv')
+all_runs <- read.csv(fnames[1])
+for(fn in fnames[2:length(fnames)]) {
+    tmp <- read.csv(fn)
+    all_runs <- rbind(all_runs, tmp)
+}
+
+for (col in c('language', 'version', 'benchmark', 'instance')) {
+   all_runs[,col] <- factor(all_runs[,col])
+}
+
 for(bench in benchmarks) {
-    runs <- subset(all_runs, (language %in% languages) & benchmark == bench)
+    runs <- subset(all_runs, benchmark == bench)
     
     ## ## All runtimes in seconds
     ## pdf(paste0('language_comparison_absolute_', bench, '.pdf'))
