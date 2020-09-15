@@ -1,0 +1,8 @@
+name = "TSPBenchmark"
+uuid = "11e56c97-f0f1-4ff7-a8b1-dd6948248576"
+authors = ["ftricoir "]
+version = "0.1.0"
+
+[deps]
+CPUTime = "a9c8d775-2e2e-55fc-8582-045d282d599e"
+StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
