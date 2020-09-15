@@ -2,7 +2,7 @@
 
 languages='c++ c++-static c++98 julia rust java java-static numba javascript python pypy'
 languages='c++ c++-static c++98 julia rust java'
-languages='c++ c++-nested'
+languages='c++ c++-nested c++-hybrid-matrix'
 
 benchmarks='2-opt Or-opt'
 
