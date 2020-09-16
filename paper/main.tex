@@ -1,0 +1,151 @@
+\documentclass[11pt,a4paper,notitlepage]{article}
+\usepackage{amssymb}
+\usepackage{amssymb}
+\usepackage{geometry} 
+\usepackage{float}
+\usepackage{booktabs}
+\usepackage{algorithm,algorithmic}
+\usepackage{amsmath}
+\usepackage{pdflscape}
+\usepackage{url}
+\usepackage{natbib}
+\usepackage{graphicx,color}
+\usepackage[utf8]{inputenc}
+\usepackage{listings} % for inline code
+
+\allowdisplaybreaks
+\geometry{a4paper,left=1in,right=1in,top=1in,bottom=1in}
+
+\newcommand{\ft}{\color{blue}}  % to show changes in revised version (F.T.)
+
+\begin{document}
+
+\title{Benchmark!!1}
+\author{
+Fabien Tricoire$^{1}$ \\[1ex]
+ \small $^1$Institute for Transport and Logistics Management,
+ Vienna University of Economics and Business\\
+ \small Welthandelsplatz 1, 1020 Vienna, Austria\\
+  \small \texttt{fabien.tricoire@wu.ac.at}\\[2ex]
+}
+\date{}
+\maketitle
+
+\begin{abstract}
+  bla bla bla
+\end{abstract}
+
+\section{Introduction}
+\label{sec:intro}
+Purposes: determine which language we can tell our students to
+use to implement routing optimisation routines. Also determine which
+language we can use ourselves.
+
+Philosophy: not necessarily the best
+implementation in the world, but a reasonably good one, i.e. one we
+can expect from an average student. Similar algorithm in various languages.
+
+What we measure: run time of the algorithm only. Everything else
+(reading data, building initial solution) is not measured. Currently
+Julia also measures compilation time, needs to be fixed.
+
+We restrict ourselves to variable-size vectors, since they are
+necessary in most algorithms for vehicle routing, for instance to
+insert or delete a vertex from a tour. This is the reason why we do
+not provide a C implementation. It is of course possible to
+implement variable-size vectors using fixed-size arrays and
+bookkeeping; however this stands directly against our stated purposes
+and philosophy. Moreover, implementing a bug-free, efficient version
+of variable-size vectors is unlikely to result in something better
+than existing libraries.
+
+\section{Languages and implementations considered}
+\subsection{C++}
+\subsection{Python}
+\subsection{Java}
+\subsection{Julia}
+\subsection{Rust}
+\subsection{JavaScript}
+JavaScript is not expected to perform as well as, say, C++. However
+there are several reasons why it can be appealing to implement routing
+algorithms in JavaScript:
+\begin{itemize}
+\item Any program written in JavaScript can run on virtually any
+  computer with a modern web browser, including smartphones.
+\item Integrating JavaScript in a web interface is especially easy.
+\item JavaScript engines have received considerable attention from
+  major companies and are the subject of fierce competition on
+  performance. As a result they have seen vast performance
+  improvements over the years and the trend is likely to continue.
+\end{itemize}
+
+We use Node.js, which allows to run JavaScript programs from the
+command line. This means that there is in fact not even the need for a
+web browser. Node.js uses Google Chrome v8's JavaScript engine~\cite{nodejs}.
+
+\section{Considered benchmarks and their format}
+
+\section{Considerations on how to implement a distance matrix}
+Perhaps the most straightforward way to implement a distance matrix in
+a number of languages is to use nested arrays, i.e. each element of the
+main array is an array representing a row of the distance matrix. This
+is typically done in C++, Java, Python (although the structure is
+officially called a \emph{list} and not an array), Javascript. C and
+C++ use pointers to achieve that effect. All these languages use the
+same C syntax for looking up values in the distance matrix: the
+distance between vertices $i$ and $j$ using distance matrix $d$ is
+written \lstinline{d[i][j]}.
+
+Another easy way to implement a distance matrix is to use what we
+call from here on a \emph{flat} distance matrix representation, which
+is a single-dimensional array containing all distance values. Assuming
+indices start at 0, the distance from $i$ to $j$ in array $d$ can be
+coded as \lstinline{d[i*n+j]}, where $n$ is the total number of
+vertices. This representation guarantees that the whole distance
+matrix is stored in contiguous memory. Additionally, looking up in
+arrays also takes time, so one lookup is better than two. The drawback
+is that we have to pay a multiplication and an addition for each
+lookup, and that lookups have to be wrapped in a function call for the
+sake of readability. Such function calls can usually be inlined,
+i.e. the function content is substituted to the function call, so
+there should be no runtime penalty from using a function call. In
+general we expect a speedup from using a flat representation.
+
+There are two cases where the above considerations on using a flat
+representation do not apply: Python does not allow inlining and Julia
+has native multi-dimensional arrays. This is discussed later.
+
+\section{Language-specific notes}
+\subsection{Python}
+Python does not allow to inline functions. Since using a flat matrix
+requires to wrap matrix value lookup in a function, using a flat distance
+matrix in Python is not beneficial. It would of course be possible to
+inline by hand, i.e. formulate the correct 1-dimensional index in the
+matrix for every lookup, but that would be impractical and defeat the
+purposes and philosophy stated in Section~\ref{sec:intro}.
+Running Python code that uses a flat representation with a JIT compiler
+(e.g. Pypy, Numba) introduces automatic inlining and is likely to
+remedy this.
+\subsection{Julia}
+Julia has native multi-dimensional arrays, which may be more efficient
+than a flat representation. We will determine which version to use
+based on experiment. Since Julia's arrays start with index 1, the code
+for flat representation lookup of the distance between vertices $i$
+and $j$ in matrix $d$ is \lstinline{d[i*n-n+j]}. It is worth noting
+that it involves one subtraction on top of the addition and
+multiplication used for 0-indexed languages.
+\subsection{JavaScript}
+All benchmarks are repetitive in nature, as they successively perform similar
+operations with different input data. In JavaScript, when our
+implementation loads 40 instances and performs the same
+benchmarking operations on all 40 them, we observe a significant performance
+hit after a few instances (2-5 times slower). In order to remedy this,
+we re-start the program individually for each instance. Advanced
+knowledge of this specific JavaScript engine might allow to remove that
+performance hit, but this is clearly outside the scope of this
+study. However it is worth noting that this can be a concern in general.
+
+\bibliographystyle{plain}
+\bibliography{benchmark}
+
+\end{document}
