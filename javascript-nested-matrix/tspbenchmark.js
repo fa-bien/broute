@@ -3,11 +3,7 @@
 // class: TSP instance
 function TSPData(n, d) {
     this.n = n;
-    this.dist = d;
-
-    this.d = function(i, j) {
-	return this.dist[i * this.n + j];
-    }
+    this.d = d;
 }
 
 // class: TSP Solution
@@ -26,12 +22,12 @@ function TSPSolution(data, sequence) {
 
     // perform the first improving two-exchange found
     var tour = this.nodes;
-    var d = this.data;
+    var d = this.data.d;
     this.first2eImprovement = function() {
 	for(var p1=0; p1 < tour.length - 3; p1++) {
 	    for(var p2=p1+2; p2 < tour.length - 1; p2++) {
-		if (d.d(tour[p1], tour[p1+1]) + d.d(tour[p2], tour[p2+1]) >
-		    d.d(tour[p1], tour[p2]) + d.d(tour[p1+1], tour[p2+1])) {
+		if (d[tour[p1]][tour[p1+1]] + d[tour[p2]][tour[p2+1]] >
+		    d[tour[p1]][tour[p2]] + d[tour[p1+1]][tour[p2+1]]) {
 		    // improving 2-exchange found
 		    for(var i=0; i < Math.floor((p2-p1+1) / 2); i++) {
 			[tour[p1+1+i], tour[p2-i]] = [tour[p2-i], tour[p1+1+i]];
@@ -53,9 +49,9 @@ function TSPSolution(data, sequence) {
     }
 
     this.orDelta = function(i, l, p) {
-	return d.d(tour[i-1], tour[i+l]) + d.d(tour[p], tour[i])
-	    + d.d(tour[i+l-1], tour[p+1]) - d.d(tour[p], tour[p+1])
-	    - d.d(tour[i-1], tour[i]) - d.d(tour[i+l-1], tour[i+l]);
+	return d[tour[i-1]][tour[i+l]] + d[tour[p]][tour[i]]
+	    + d[tour[i+l-1]][tour[p+1]] - d[tour[p]][tour[p+1]]
+	    - d[tour[i-1]][tour[i]] - d[tour[i+l-1]][tour[i+l]];
     }
 	
     // perform the first improving Or move found
@@ -101,8 +97,8 @@ function readData(fname) {
 	} else if (n == 0 && tokens.length == 2) {
 	    n = parseInt(tokens[0]);
 	    nsols = parseInt(tokens[1]);
-	} else if (tokens.length == n && d.length < n * n) {
-	    d = d.concat(tokens.map(x => parseInt(x)));
+	} else if (tokens.length == n && d.length < n) {
+	    d.push(tokens.map(x => parseInt(x)));
 	} else if (tokens.length == n+1 && tours.length < nsols) {
 	    tours.push(tokens.map(x => parseInt(x)));
 	}

@@ -1,5 +1,9 @@
 #!/bin/bash
 
 version='node '`node --version`
+dirname=`basename \`pwd\``
 
-./tspbenchmark.js $1 $2 | sed -e "s/javascript/javascript,$version/g"
+for i in $1/*
+do
+    ./tspbenchmark.js $i $2 | sed -e "s/javascript/$dirname,$version/g"
+done
