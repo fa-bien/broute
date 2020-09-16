@@ -1,1 +1,1 @@
-../pypy/run_benchmark.sh
+../pypy-nested-matrix/run_benchmark.sh
