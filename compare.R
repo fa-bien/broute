@@ -3,7 +3,6 @@ library(ggplot2)
 
 languages <- c('c++', 'c++98', 'c++-static', 'julia', 'rust',
                'java', 'java-static', 'python', 'numba', 'pypy')
-languages  <- c('c++', 'julia', 'julia-flat-matrix', 'julia-flat-static-matrix')
 
 benchmarks <- c('2-opt', 'Or-opt')
 
