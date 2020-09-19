@@ -1,4 +1,4 @@
 #!/bin/sh
 
-rm *.class
+rm -f *.class
 javac TSPBenchmark.java
