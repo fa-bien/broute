@@ -2,23 +2,24 @@
 
 import sys
 
-def loadCSV(fname):
+def loadCSV(fnames):
     out = {}
-    lines = []
-    with open(fname, 'r') as f:
-        lines = f.readlines()
-    # read and process header...
-    columns = lines[0].rstrip().split(',')
-    column_index = { col: index
-                     for (index, col) in enumerate(columns) }
-    # now actually read rows of experimental data
-    for line in lines[1:]:
-        tokens = line.rstrip().split(',')
-        lang = tokens[column_index['language']]
-        bench = tokens[column_index['benchmark']]
-        instance = tokens[column_index['instance']]
-        checksum = tokens[column_index['checksum']]
-        out[lang, bench, instance] = checksum
+    for fname in fnames:
+        lines = []
+        with open(fname, 'r') as f:
+            lines = f.readlines()
+        # read and process header...
+        columns = lines[0].rstrip().split(',')
+        column_index = { col: index
+                         for (index, col) in enumerate(columns) }
+        # now actually read rows of experimental data
+        for line in lines[1:]:
+            tokens = line.rstrip().split(',')
+            lang = tokens[column_index['language']]
+            bench = tokens[column_index['benchmark']]
+            instance = tokens[column_index['instance']]
+            checksum = tokens[column_index['checksum']]
+            out[lang, bench, instance] = checksum
     return out
 
 # return true if expdata contains only checksum-consistent results across
@@ -38,15 +39,15 @@ def sanityCheck(expdata):
     return allgood
 
 def main():
-    fname = 'allruns.csv'
+    fnames = ['allruns.csv']
     if len(sys.argv) > 1:
-        fname = sys.argv[1]
-    expdata = loadCSV(fname)
+        fnames = sys.argv[1:]
+    expdata = loadCSV(fnames)
     sane = sanityCheck(expdata)
     if sane:
-        print('CSV file contains consistent data across languages')
+        print('CSV files contain consistent data across languages')
     else:
-        print('Inconsistent data found in CSV file')
+        print('Inconsistent data found in CSV files')
         
 if __name__ == '__main__':
     main()
