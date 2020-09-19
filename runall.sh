@@ -1,6 +1,11 @@
 #!/bin/bash
 
-languages='c++ c++-static c++98 julia rust java java-static numba javascript python pypy'
+# languages: list of command line arguments, or default list if no argument
+defaultlanguages='c++ c++-static c++98 julia rust java java-static numba javascript python pypy'
+languages="$@"
+if [[ "$#" -lt 1 ]]; then
+    languages=$defaultlanguages
+fi
 
 benchmarks='2-opt Or-opt'
 
