@@ -1,8 +1,6 @@
-import os, sys
+import tspdata
 import numpy as np
 from itertools import chain
-
-import tspdata
 
 class TSPSolution:
     def __init__(self, data, permutation):
