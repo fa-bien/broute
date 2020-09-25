@@ -1,8 +1,8 @@
 library(dplyr)
 library(ggplot2)
 
-languages <- c('c++', 'c++98', 'c++-static', 'julia', 'rust',
-               'java', 'java-static', 'python', 'numba', 'pypy')
+languages <- c('c++', 'c++98', 'c++-static-arrays', 'julia', 'rust',
+               'java', 'java-static-arrays', 'python', 'numba', 'pypy')
 
 benchmarks <- c('2-opt', 'Or-opt')
 
