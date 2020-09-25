@@ -1,10 +1,20 @@
 library(dplyr)
 library(ggplot2)
 
-languages <- c('c++', 'c++98', 'c++-static-arrays', 'julia', 'rust',
-               'java', 'java-static-arrays', 'python', 'numba', 'pypy')
+## reference language for ratio calculation
+reflang <- 'c++'
 
-languages <- c('c++', 'numba', 'numba-flat-matrix')
+## read languages to compare from command line; if none given, use default
+defaultlanguages <- c('c++', 'c++98', 'julia', 'rust')
+languages <- commandArgs(trailingOnly=TRUE)
+if (length(languages)==0) {
+    languages <- defaultlanguages
+}
+
+## make sure that data for the default language is loaded as well
+if (! (reflang %in% languages)) {
+    languages <- c(reflang, languages)
+}
 
 benchmarks <- c('2-opt', 'Or-opt')
 
@@ -34,8 +44,8 @@ for(bench in benchmarks) {
     
     ## All runtimes as a ratio of C++ run time
     runs <- arrange(runs, language, instance)
-    cpp <- filter(runs, language=='c++')
-    runs$reference <- cpp$time
+    refdata <- filter(runs, language==reflang)
+    runs$reference <- refdata$time
     runs$normalised <- runs$time / runs$reference
     
     pdf(paste0('language_comparison_relative_', bench, '.pdf'))
