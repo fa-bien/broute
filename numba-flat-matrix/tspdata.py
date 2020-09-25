@@ -2,8 +2,10 @@ import sys
 import copy
 import random
 import math
+import functools
 
 import numpy
+from numba import jit
 
 mapsize = 100
 
@@ -11,7 +13,8 @@ mapsize = 100
 # benchmarking purpose
 class TSPData:
     def __init__(self, n, d):
-        self.n, self.d = n, numpy.array(d)
+        self.n = n
+        self.d = numpy.array(functools.reduce(lambda x, y: x+y, d))
         
     def matrixstring(self):
         rows = [ ' '.join(str(x) for x in row) for row in self.d ]
@@ -40,3 +43,9 @@ class TSPData:
         points = [x for x in range(1, self.n)]
         random.shuffle(points)
         return [0] + points + [0]
+
+# using dist as a flat matrix representing a n * n matrix,
+# return distance between i and j
+@jit(nopython=True)
+def dist(d, n, i, j):
+    return d[i*n+j]

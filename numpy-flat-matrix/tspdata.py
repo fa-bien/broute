@@ -2,6 +2,7 @@ import sys
 import copy
 import random
 import math
+import functools
 
 import numpy
 
@@ -11,7 +12,11 @@ mapsize = 100
 # benchmarking purpose
 class TSPData:
     def __init__(self, n, d):
-        self.n, self.d = n, numpy.array(d)
+        self.n = n
+        self.dist = numpy.array(functools.reduce(lambda x, y: x+y, d))
+
+    def d(self, i, j):
+        return self.dist[i*self.n+j]
         
     def matrixstring(self):
         rows = [ ' '.join(str(x) for x in row) for row in self.d ]

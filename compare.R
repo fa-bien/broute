@@ -4,6 +4,8 @@ library(ggplot2)
 languages <- c('c++', 'c++98', 'c++-static-arrays', 'julia', 'rust',
                'java', 'java-static-arrays', 'python', 'numba', 'pypy')
 
+languages <- c('c++', 'numba', 'numba-flat-matrix')
+
 benchmarks <- c('2-opt', 'Or-opt')
 
 ## first we glue all data together in one data frame
