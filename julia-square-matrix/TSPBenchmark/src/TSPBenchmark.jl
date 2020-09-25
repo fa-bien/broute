@@ -1,30 +1,23 @@
 module TSPBenchmark
 
 using CPUTime
-using StaticArrays
 
 export benchmark_many
 
-struct TSPData{ T<:Real }
-    n::Int    # number of nodes
-    d::Vector{T} # distance matrix
-end
+include("tspdata.jl")
 
 mutable struct TSPSolution
     tour::Vector{Int}
 end
 
-function dist(d::TSPData{T}, i::T2, j::T2) where T where T2
-    d.d[i * d.n - d.n + j]
-end
-
-function read_data(fname::String, T::DataType=Int)
+# MT is the type of matrix representation to use for TSP data
+function read_data(fname::String, DT::DataType=Int, MT=SquareMatrixTSPData)
     lines = open(fname) do f
         collect(eachline(f))
     end
     n = 0
     drow = 1
-    d = Vector{T}()
+    d = zeros(DT, 1, 1)
     nsols = 0
     solutions = TSPSolution[]
     for line in lines
@@ -35,21 +28,20 @@ function read_data(fname::String, T::DataType=Int)
         elseif length(tokens) == 2 && n == 0
             n = parse(Int, tokens[1])
             nsols = parse(Int, tokens[2])
-            d = zeros(T, n^2)
+            d = zeros(DT, n, n)
         elseif drow ≤ n
-            row = [parse(T, x) for x in tokens]
-            f = 1 + (n * (drow - 1))
-            d[f:f + n - 1] = row
+            row = [parse(DT, x) for x in tokens]
+            d[drow,:] = row
             drow += 1
         elseif length(solutions) ≤ nsols
             push!(solutions, TSPSolution([1+parse(Int, x) for x in tokens]))
         end
     end
-    data = TSPData{T}(n, [x for x in d])
+    data = MT(d, n)
     return data, solutions
 end
 
-function two_opt(data::TSPData{T}, sol::TSPSolution) where T
+function two_opt(data::T, sol::TSPSolution) where T <: TSPData
     t = 0
     while first2eimprovement(data, sol)
         t += 1
@@ -57,7 +49,7 @@ function two_opt(data::TSPData{T}, sol::TSPSolution) where T
     return t
 end
 
-function first2eimprovement(d::TSPData{T}, sol::TSPSolution) where T
+function first2eimprovement(d::T, sol::TSPSolution) where T
     for p1 in 1:length(sol.tour)-3, p2 in p1+2:length(sol.tour)-1
         if dist(d, sol.tour[p1], sol.tour[p1+1]) +
             dist(d, sol.tour[p2], sol.tour[p2+1]) >
@@ -74,7 +66,7 @@ function first2eimprovement(d::TSPData{T}, sol::TSPSolution) where T
     return false
 end
 
-function or_opt(data::TSPData{T}, sol::TSPSolution) where T
+function or_opt(data::T, sol::TSPSolution) where T
     t = 0
     while firstorimprovement(data, sol)
         t += 1
@@ -82,7 +74,7 @@ function or_opt(data::TSPData{T}, sol::TSPSolution) where T
     return t
 end
 
-function firstorimprovement(d::TSPData{T}, s::TSPSolution) where T
+function firstorimprovement(d::T, s::TSPSolution) where T
     for i in 2:length(s.tour)-1, l in 1:(min(3, length(s.tour)-i)),
         p in [ 1:i-2 ; i+l:length(s.tour)-1 ]
         #
@@ -114,32 +106,7 @@ function firstorimprovement(d::TSPData{T}, s::TSPSolution) where T
     return false
 end
 
-# old less efficient version
-
-# function firstorimprovement(d::TSPData{T}, s::TSPSolution) where T
-#     for i in 2:length(s.tour)-1, l in 1:(min(3, length(s.tour)-i)),
-#         p in [ 1:i-2 ; i+l:length(s.tour)-1 ]
-#         #
-#         δ = d.d[s.tour[i-1], s.tour[i+l]] + d.d[s.tour[p], s.tour[i]] +
-#             d.d[s.tour[i+l-1], s.tour[p+1]] -
-#             d.d[s.tour[p], s.tour[p+1]] - d.d[s.tour[i-1], s.tour[i]] -
-#             d.d[s.tour[i+l-1], s.tour[i+l]]
-#         # improvement found
-#         if δ < 0
-#             if i < p
-#                 s.tour = [ s.tour[1:i-1] ; s.tour[i+l:p] ; s.tour[i:i+l-1] ;
-#                            s.tour[p+1:end] ]
-#             else
-#                 s.tour = [ s.tour[1:p] ; s.tour[i:i+l-1] ; s.tour[p+1:i-1] ;
-#                            s.tour[i+l:end] ]
-#             end
-#             return true
-#         end
-#     end
-#     return false
-# end
-
-function benchmark_one(data::TSPData{T}, solutions::Vector{TSPSolution},
+function benchmark_one(data::T, solutions::Vector{TSPSolution},
                        benchmarkname::String) where T
     totaltime = 0.0
     nimpr = 0
@@ -157,11 +124,12 @@ function benchmark_one(data::TSPData{T}, solutions::Vector{TSPSolution},
     return nimpr, totaltime
 end
 
-function benchmark_many(dirname::String, benchmarkname::String="2-opt")
+function benchmark_many(dirname::String, benchmarkname::String="2-opt",
+                        MatrixType=SquareMatrixTSPData)
 #    println("#language,version,benchmark,instance,n,nsolutions,n_improvements,time(s)")
     nimpr = 0
     for fname in readdir(dirname)
-        d, sols = read_data(joinpath(dirname, fname), Int)
+        d, sols = read_data(joinpath(dirname, fname), Int, MatrixType)
         n, l = benchmark_one(d, sols, benchmarkname)
         println(join((basename(pwd()), VERSION, benchmarkname, fname,
                       string(d.n),

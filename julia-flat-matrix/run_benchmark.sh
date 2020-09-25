@@ -1,1 +1,1 @@
-../julia/run_benchmark.sh
+../julia-square-matrix/run_benchmark.sh

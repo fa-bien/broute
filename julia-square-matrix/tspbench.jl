@@ -10,7 +10,7 @@ function main(ARGS)
         if length(ARGS) > 1
             benchmarkname = ARGS[2]
         end
-        benchmark_many(ARGS[1], benchmarkname, TSPBenchmark.FlatMatrixTSPData)
+        benchmark_many(ARGS[1], benchmarkname, TSPBenchmark.SquareMatrixTSPData)
     end
 end
 
