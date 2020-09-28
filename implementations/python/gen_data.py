@@ -2,7 +2,7 @@
 
 import sys
 
-from python import tspdata
+import tspdata
 
 n = int(sys.argv[1])
 nsols = int(sys.argv[2])
