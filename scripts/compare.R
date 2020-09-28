@@ -7,7 +7,7 @@ library(ggplot2)
 reflang <- 'c++'
 
 ## read languages to compare from command line; if none given, use default
-defaultlanguages <- c('c++', 'c++98', 'julia', 'rust')
+defaultlanguages <- c('c++', 'c++98', 'julia-flat-matrix', 'rust')
 languages <- commandArgs(trailingOnly=TRUE)
 if (length(languages)==0) {
     languages <- defaultlanguages
@@ -22,6 +22,9 @@ benchmarks <- c('2-opt', 'Or-opt')
 
 ## first we glue all data together in one data frame
 fnames <- paste0(languages, '-runs.csv')
+
+print(fnames)
+
 all_runs <- read.csv(fnames[1])
 for(fn in fnames[2:length(fnames)]) {
     tmp <- read.csv(fn)

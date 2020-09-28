@@ -1,5 +1,11 @@
 #!/bin/bash
 
+# Expectations: * a directory called 'implementations' contains the various
+#                 implementations
+#               * a directory called 'instances' contains all test instances
+impldir=`pwd`'/implementations'
+instdir=`pwd`'/instances'
+
 # languages: list of command line arguments, or default list if no argument
 defaultlanguages='c++ c++-static-arrays c++98 julia rust java java-static-arrays numba javascript python pypy'
 languages="$@"
@@ -16,14 +22,14 @@ benchmarks='2-opt Or-opt'
 for lang in $languages
 do
     (echo "Running $lang"
-     (cd $lang
+     (pushd $impldir'/'$lang > /dev/null
       [[ -f compile.sh ]] && ./compile.sh
       echo "language,version,benchmark,instance,n,nsolutions,checksum,time"
       for bench in $benchmarks
       do
-	  ./run_benchmark.sh ../instances $bench
+	  ./run_benchmark.sh $instdir $bench
       done
-      cd ..
+      popd > /dev/null
      ) > $lang-runs.csv
      echo "Done running $lang"
     ) &
