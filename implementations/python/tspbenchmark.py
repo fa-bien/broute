@@ -34,8 +34,8 @@ def loadfromfile(fname):
 def benchmarkone(solutions, benchmarkname):
     if benchmarkname == '2-opt':
         bench = lambda x: x.two_opt()
-    elif benchmarkname == 'LNS':
-        bench = lambda x: x.LNS()
+    elif benchmarkname.lower() == 'lns':
+        bench = lambda x: x.lns()
     elif benchmarkname == 'Or-opt':
         bench = lambda x: x.or_opt()
     else:
