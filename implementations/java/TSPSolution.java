@@ -87,4 +87,45 @@ public class TSPSolution {
 	    - data_.d(nodes_.get(i-1), nodes_.get(i))
 	    - data_.d(nodes_.get(i+l-1), nodes_.get(i+l));
     }
+
+    public int lns(int niter) {
+	int checksum = 0;
+	for (int iter=0; iter < niter; iter++) {
+	    // step 0: copy solution
+	    ArrayList<Integer> tmp = new ArrayList<Integer>(nodes_);
+	    ArrayList<Integer> unplanned = new ArrayList<Integer>();
+	    // step 1: destroy
+	    int where = 1;
+	    while (where < tmp.size() - 1) {
+		unplanned.add(tmp.get(where));
+		tmp.remove(where);
+		where += 1;
+	    }
+	    // step 2: repair
+	    while (unplanned.size() > 0) {
+		int bestfrom=0, bestto=0;
+		int bestcost = Integer.MAX_VALUE;
+		for (int k=0; k < unplanned.size(); k++) {
+		    for (int to=0; to < tmp.size() - 1; to++) {
+			int delta = data_.d(tmp.get(to), unplanned.get(k)) +
+			    data_.d(unplanned.get(k), tmp.get(to+1)) -
+			    data_.d(tmp.get(to), tmp.get(to+1));
+			if (delta < bestcost) {
+			    bestcost = delta;
+			    bestfrom = k;
+			    bestto = to;
+			}
+			
+		    }
+		}
+		// perform best found insertion
+		tmp.add(bestto + 1, unplanned.get(bestfrom));
+		unplanned.remove(bestfrom);
+		checksum += bestcost;
+	    }
+	    // step 3: move or not
+	    nodes_ = tmp;
+	}
+	return checksum;
+    }
 }

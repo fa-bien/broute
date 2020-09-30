@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <memory>
+#include <climits>
 
 #include "tspdata.h"
 
@@ -88,6 +89,49 @@ public:
 	while (firstorimprovement(data)) t++;
 	return t;
     }
+
+    int lns(const TSPData<T> &data, unsigned int niter=10) {
+	T checksum = 0;
+	for (unsigned int iter=0; iter < niter; iter++) {
+	    // step 0: copy solution
+	    vector<int> tmp = nodes_;
+	    vector<int> unplanned;
+	    // step 1: destroy
+	    unsigned int where = 1;
+	    while (where < tmp.size() - 1) {
+		unplanned.push_back(tmp[where]);
+		tmp.erase(tmp.begin() + where);
+		where += 1;
+	    }
+	    // step 2: repair
+	    while (unplanned.size() > 0) {
+		unsigned int bestfrom=0, bestto=0;
+		// should be big enough and castable for any relevant type
+		T bestcost = INT_MAX;
+		for (unsigned int k=0; k < unplanned.size(); k++) {
+		    for (unsigned to=0; to < tmp.size() -1; to++) {
+			if (data.d(tmp[to], unplanned[k]) +
+			    data.d(unplanned[k], tmp[to+1]) -
+			    data.d(tmp[to], tmp[to+1]) < bestcost) {
+			    bestcost = data.d(tmp[to], unplanned[k]) +
+				data.d(unplanned[k], tmp[to+1]) -
+				data.d(tmp[to], tmp[to+1]);
+			    bestfrom = k;
+			    bestto = to;
+			}
+		    }
+		}
+		// perform best found insertion
+		tmp.insert(tmp.begin() + bestto + 1, unplanned[bestfrom]);
+		unplanned.erase(unplanned.begin() + bestfrom);
+		checksum += bestcost;
+	    }
+	    // step 3: move or not
+	    nodes_ = tmp;
+	}
+	return (int) checksum;
+    }
+    
 };
 
 #endif

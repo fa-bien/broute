@@ -74,6 +74,8 @@ public class TSPBenchmark{
 		n = solutions[i].two_opt();
 	    } else if (benchmarkname.equals("Or-opt")) {
 		n = solutions[i].or_opt();
+	    } else if (benchmarkname.equals("lns")) {
+		n = solutions[i].lns(10);
 	    } else {
 		System.err.println("Unknown benchmark: <" + benchmarkname +">");
 		System.exit(2);

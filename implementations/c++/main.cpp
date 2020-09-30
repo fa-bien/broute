@@ -62,6 +62,8 @@ benchmark_one(vector<TSPSolution<T> > solutions, string benchmarkname) {
 	    n = solutions[i].two_opt();
 	} else if (benchmarkname == "Or-opt") {
 	    n = solutions[i].or_opt();
+	} else if (benchmarkname == "lns") {
+	    n = solutions[i].lns();
 	} else {
 	    cerr << "Unknown benchmark: " << benchmarkname << endl;
 	    exit(2);

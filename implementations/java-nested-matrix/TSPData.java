@@ -12,4 +12,14 @@ public class TSPData {
 	n_ = n;
 	d_ = d;
     }
+    
+    public TSPData(int n, int[]d) {
+	n_ = n;
+	d_ = new int[n][n];
+	for (int i=0; i<n; i++) {
+	    for (int j=0; j<n; j++) {
+		d_[i][j] = d[i*n+j];
+	    }
+	}
+    }
 }

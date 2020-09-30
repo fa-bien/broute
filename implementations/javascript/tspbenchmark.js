@@ -81,6 +81,46 @@ function TSPSolution(data, sequence) {
 	return false;
     };
 
+    // lns!
+    this.lns = function(niter=10) {
+	var checksum = 0;
+	for (var iter=0; iter < niter; iter++) {
+	    // step 0: copy solution
+	    var tmp = [...tour];
+	    var unplanned = [];
+	    // step 1: destroy
+	    var where = 1;
+	    while (where < tmp.length - 1) {
+		unplanned.push(tmp[where]);
+		tmp.splice(where, 1);
+		where += 1;
+	    }
+	    // step 2: repair
+	    while (unplanned.length > 0) {
+		var bestfrom=0, bestto=0, bestcost = Number.MAX_SAFE_INTEGER;
+		for (var k=0; k < unplanned.length; k++) {
+		    for (var to=0; to < tmp.length - 1; to++) {
+			var delta = d.d(tmp[to], unplanned[k]) +
+			    d.d(unplanned[k], tmp[to+1]) -
+			    d.d(tmp[to], tmp[to+1]);
+			if (delta < bestcost) {
+			    bestcost = delta;
+			    bestfrom = k;
+			    bestto = to;
+			}
+		    }
+		}
+		// perform best found insertion
+		tmp.splice(bestto + 1, 0, unplanned[bestfrom]);
+		unplanned.splice(bestfrom, 1);
+		checksum += bestcost;
+	    }
+	    // step 3: move or not
+	    tour = tmp;
+	}
+	return checksum;
+    }
+    
 }
 
 // this version requires node
@@ -126,6 +166,8 @@ function benchmarkOne(path, benchmarkname) {
 	    n = sol.twoOpt();
 	} else if (benchmarkname == 'Or-opt') {
 	    n = sol.orOpt();
+	} else if (benchmarkname == 'lns') {
+	    n = sol.lns();
 	} else {
 	    console.log('Unknown benchmark: ', benchmarkname);
 	}

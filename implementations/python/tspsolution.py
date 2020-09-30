@@ -82,7 +82,7 @@ class TSPSolution:
                             bestcost = d[i][k] + d[k][j] - d[i][j]
                             bestnode, bestfro, bestto = k, fro, pos
                 # perform best found insertion
-                tmp.insert(pos+1, bestnode)
+                tmp.insert(bestto+1, bestnode)
                 del unplanned[bestfro]
                 checksum += bestcost
             # step 3: move or not (in our case always move)

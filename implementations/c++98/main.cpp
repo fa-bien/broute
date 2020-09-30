@@ -68,6 +68,8 @@ benchmark_one(const TSPData<T> &data, vector<TSPSolution<T> > solutions,
 	    n = solutions[i].two_opt(data);
 	} else if (benchmarkname == "Or-opt") {
 	    n = solutions[i].or_opt(data);
+	} else if (benchmarkname == "lns") {
+	    n = solutions[i].lns(data);
 	} else {
 	    cerr << "Unknown benchmark: " << benchmarkname << endl;
 	    exit(2);
