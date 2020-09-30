@@ -13,7 +13,7 @@ if [[ "$#" -lt 1 ]]; then
     languages=$defaultlanguages
 fi
 
-benchmarks='2-opt Or-opt'
+benchmarks='2-opt Or-opt lns'
 
 # we do multi-threading!
 # Number of threads = environment variable THREADS or default value
