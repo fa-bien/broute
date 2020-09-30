@@ -100,7 +100,46 @@ impl TSPSolution {
         }
         return false;
     }
-    
+
+    fn lns(&mut self, data: &TSPData, niter: i32) -> i32 {
+        let mut checksum: i32 = 0;
+        for _iter in 1..(niter+1) {
+            // step 0: copy incumbent
+            let mut tmp = self.nodes.clone();
+            let mut unplanned = Vec::new();
+            // step 1: destroy
+            let mut t = 1;
+            while t < tmp.len() -1 {
+                unplanned.push(tmp[t]);
+                tmp.remove(t);
+                t += 1;
+            }
+            // step 2: repair
+            while unplanned.len() > 0 {
+                let mut bestfrom: usize = 0;
+                let mut bestto: usize = 0;
+                let mut bestcost: i32 = i32::MAX;
+                for (fro, k) in unplanned.iter().enumerate() {
+                    for (to, ij) in tmp.windows(2).enumerate() {
+                        let (i, j) = (ij[0], ij[1]);
+                        let delta = data.d(i, *k) + data.d(*k, j) - data.d(i, j);
+                        if delta < bestcost {
+                            bestcost = delta;
+                            bestfrom = fro;
+                            bestto = to;
+                        }
+                    }
+                }
+		// perform best found insertion
+		tmp.insert(bestto + 1, unplanned[bestfrom]);
+		unplanned.remove(bestfrom);
+		checksum += bestcost;
+            }
+            // step 3: set new incumbent
+            self.nodes = tmp;
+        }
+        return checksum;
+    }
 }
 
 fn read_data(fname: &str) -> (TSPData, Vec<TSPSolution>) {
@@ -149,6 +188,8 @@ fn benchmark_one(data: &TSPData, solutions: &mut Vec<TSPSolution>,
             cnt = sol.two_opt(data);
         } else if benchmarkname == "Or-opt" {
             cnt = sol.or_opt(data);
+        } else if benchmarkname == "lns" {
+            cnt = sol.lns(data, 10);
         } else {
             panic!("Unknown benchmark: {:?}", benchmarkname);
         }

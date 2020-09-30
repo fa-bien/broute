@@ -121,7 +121,6 @@ public:
 		T bestcost = INT_MAX;
 		for (unsigned int k=0; k < unplanned.size(); k++) {
 		    for (unsigned to=0; to < tmp.size() -1; to++) {
-			
 			T delta = data_->d(tmp[to], unplanned[k]) +
 			    data_->d(unplanned[k], tmp[to+1]) -
 			    data_->d(tmp[to], tmp[to+1]);
