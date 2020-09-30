@@ -30,6 +30,11 @@ class TSPSolution:
         # actually speeds things up!
         tour, d, n = self.nodes, self.data.d, self.data.n
         return aux_oropt(tour, d, n)
+
+    def lns(self, niter=10):
+        return float('Inf')
+        tour, d, n = self.nodes, self.data.d, self.data.n
+        return aux_lns(tour, d, n, niter)    
     
 @jit(nopython=True)
 def aux_2opt(tour, d, n):
@@ -68,3 +73,34 @@ def aux_oropt(tour, d, n):
                             tour[p+1:p+1+l] = t[:]
                         return True
     return False
+
+# currently not working: np.insert not supported by numba...
+@jit(nopython=True)
+def aux_lns(tour, d, n, niter):
+    checksum = 0
+    for iter in range(niter):
+        # step 0: copy solution
+        tmp = tour.copy()
+        unplanned = []
+        # step 1: destroy
+        where = 1
+        while where < len(tmp) - 1:
+            unplanned.append(tmp[where])
+            tmp = np.delete(tmp, where)
+            where += 1
+        # step 2: repair
+        while len(unplanned) > 0:
+            bestcost, bestnode, bestfro, bestto = sys.maxsize, -1, -1, -1
+            for (fro, k) in enumerate(unplanned):
+                for ((pos, i), j) in zip(enumerate(tmp[:-1]), tmp[1:]):
+                    delta = dist(d, n, i, k) + dist(d, n, k, j) \
+                        - dist(d, n, i, j)
+                    if delta < bestcost:
+                        bestcost, bestfro, bestto = delta, fro, pos
+            # perform best found insertion
+            tmp = np.insert(tmp, bestto+1, bestnode)
+            del unplanned[bestfro]
+            checksum += bestcost
+            # step 3: move or not (in our case always move)
+        tour = tmp
+    return checksum

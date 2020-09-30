@@ -84,7 +84,7 @@ class TSPSolution:
                             bestcost, bestfro, bestto = delta, fro, pos
                 # perform best found insertion
                 tmp = np.insert(tmp, bestto+1, bestnode)
-                unplanned = np.delete(unplanned, bestfro)
+                del unplanned[bestfro]
                 checksum += bestcost
                 # step 3: move or not (in our case always move)
             self.nodes = tmp
