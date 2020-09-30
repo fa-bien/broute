@@ -78,8 +78,9 @@ class TSPSolution:
                 bestcost, bestnode, bestfro, bestto = sys.maxsize, -1, -1, -1
                 for (fro, k) in enumerate(unplanned):
                     for ((pos, i), j) in zip(enumerate(tmp[:-1]), tmp[1:]):
-                        if d[i][k] + d[k][j] - d[i][j] < bestcost:
-                            bestcost = d[i][k] + d[k][j] - d[i][j]
+                        delta = d[i][k] + d[k][j] - d[i][j]
+                        if delta < bestcost:
+                            bestcost = delta
                             bestnode, bestfro, bestto = k, fro, pos
                 # perform best found insertion
                 tmp.insert(bestto+1, bestnode)

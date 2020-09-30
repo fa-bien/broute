@@ -1,6 +1,8 @@
-import tspdata
+import sys
 import copy
 from itertools import chain
+
+import tspdata
 
 class TSPSolution:
     def __init__(self, data, permutation):
@@ -58,6 +60,36 @@ class TSPSolution:
                         return True
         return False
     
+    def lns(self, niter=10):
+        d = self.data.d
+        checksum = 0
+        for iter in range(niter):
+            # step 0: copy solution
+            tmp = copy.copy(self.nodes)
+            unplanned = []
+            # step 1: destroy
+            where = 1
+            while where < len(tmp) - 1:
+                unplanned.append(tmp[where])
+                del tmp[where]
+                where += 1
+            # step 2: repair
+            while len(unplanned) > 0:
+                bestcost, bestnode, bestfro, bestto = sys.maxsize, -1, -1, -1
+                for (fro, k) in enumerate(unplanned):
+                    for ((pos, i), j) in zip(enumerate(tmp[:-1]), tmp[1:]):
+                        delta = d(i, k) + d(k, j) - d(i, j)
+                        if delta < bestcost:
+                            bestcost = delta
+                            bestnode, bestfro, bestto = k, fro, pos
+                # perform best found insertion
+                tmp.insert(bestto+1, bestnode)
+                del unplanned[bestfro]
+                checksum += bestcost
+                # step 3: move or not (in our case always move)
+            self.nodes = tmp
+        return checksum
+
     def cost(self):
         total = 0
         for i, j in zip(self.nodes[:-1], self.nodes[1:]):
