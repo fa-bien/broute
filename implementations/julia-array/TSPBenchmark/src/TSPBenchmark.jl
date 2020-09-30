@@ -108,30 +108,40 @@ function firstorimprovement(d::TSPData{T}, s::TSPSolution) where T
     return false
 end
 
-# old less efficient version
-
-# function firstorimprovement(d::TSPData{T}, s::TSPSolution) where T
-#     for i in 2:length(s.tour)-1, l in 1:(min(3, length(s.tour)-i)),
-#         p in [ 1:i-2 ; i+l:length(s.tour)-1 ]
-#         #
-#         δ = d.d[s.tour[i-1], s.tour[i+l]] + d.d[s.tour[p], s.tour[i]] +
-#             d.d[s.tour[i+l-1], s.tour[p+1]] -
-#             d.d[s.tour[p], s.tour[p+1]] - d.d[s.tour[i-1], s.tour[i]] -
-#             d.d[s.tour[i+l-1], s.tour[i+l]]
-#         # improvement found
-#         if δ < 0
-#             if i < p
-#                 s.tour = [ s.tour[1:i-1] ; s.tour[i+l:p] ; s.tour[i:i+l-1] ;
-#                            s.tour[p+1:end] ]
-#             else
-#                 s.tour = [ s.tour[1:p] ; s.tour[i:i+l-1] ; s.tour[p+1:i-1] ;
-#                            s.tour[i+l:end] ]
-#             end
-#             return true
-#         end
-#     end
-#     return false
-# end
+function lns(d::TSPData{T}, sol::TSPSolution, niter::Int=10) where T
+    checksum = zero(T)
+    for iter in 1:niter
+        # step 0: copy incumbent
+        tmp = copy(sol.tour)
+        unplanned = Int[]
+        # step 1: destroy
+        t = 2
+        while t < length(tmp)
+            push!(unplanned, tmp[t])
+            deleteat!(tmp, t)
+            t += 1
+        end
+        # step 2: repair
+        while length(unplanned) > 0
+            bestcost, bestfrom, bestto = typemax(T), 0, 0
+            for from in 1:length(unplanned), to in 1:length(tmp)-1
+                δ = d.d[tmp[to], unplanned[from]] +
+                    d.d[unplanned[from], tmp[to+1]] -
+                    d.d[tmp[to], tmp[to+1]]
+                if δ < bestcost
+                    bestcost, bestfrom, bestto = δ, from, to
+                end
+            end
+            # perform best found insertion
+            insert!(tmp, bestto + 1, unplanned[bestfrom])
+            deleteat!(unplanned, bestfrom)
+            checksum += bestcost
+        end
+        # step 3: move to new incumbent
+        sol.tour = tmp
+    end
+    checksum
+end
 
 function benchmark_one(data::TSPData{T}, solutions::Vector{TSPSolution},
                        benchmarkname::String) where T
@@ -142,6 +152,8 @@ function benchmark_one(data::TSPData{T}, solutions::Vector{TSPSolution},
             t = @CPUelapsed n = two_opt(data, s)
         elseif lowercase(benchmarkname) == "or-opt"
             t = @CPUelapsed n = or_opt(data, s)
+        elseif lowercase(benchmarkname) == "lns"
+            t = @CPUelapsed n = lns(data, s)
         else
             throw(ArgumentError("Unknown benchmark: $benchmarkname"))
         end

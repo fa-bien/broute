@@ -63,6 +63,9 @@ class TSPSolution:
     def lns(self, niter=10):
         d = self.data.d
         checksum = 0
+
+        # print('Tour before:', self.nodes)
+        
         for iter in range(niter):
             # step 0: copy solution
             tmp = copy.copy(self.nodes)
@@ -73,19 +76,42 @@ class TSPSolution:
                 unplanned.append(tmp[where])
                 del tmp[where]
                 where += 1
+
+            # print('Tour after destruction:', tmp)
+        
             # step 2: repair
             while len(unplanned) > 0:
                 bestcost, bestnode, bestfro, bestto = math.inf, -1, -1, -1
                 for (fro, k) in enumerate(unplanned):
                     for ((pos, i), j) in zip(enumerate(tmp[:-1]), tmp[1:]):
+
+                        # print("Insertion of", k, "between", i, "and", j,
+                        #       "\tδ =", d[i][k] + d[k][j] - d[i][j])
+
+                        # print("\td[" + str(i) + "][" + str(k) + "] = "
+                        #         + str(d[i][k]))
+                        # print("\td[" + str(k) + "][" + str(j) + "] = "
+                        #         + str(d[k][j]))
+                        # print("\td[" + str(i) + "][" + str(j) + "] = "
+                        #         + str(d[i][j]))
+        
                         if d[i][k] + d[k][j] - d[i][j] < bestcost:
+
+                            # print('\tBEST')
+                            
                             bestcost = d[i][k] + d[k][j] - d[i][j]
                             bestnode, bestfro, bestto = k, fro, pos
                 # perform best found insertion
+
+                # print('Tour before insertion:', tmp)
+        
                 tmp.insert(bestto+1, bestnode)
                 del unplanned[bestfro]
                 checksum += bestcost
-            # step 3: move or not (in our case always move)
+
+                # print('Tour afterinsertion:', tmp)
+
+                # step 3: move or not (in our case always move)
             self.nodes = tmp
         return checksum
             

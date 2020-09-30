@@ -106,6 +106,44 @@ function firstorimprovement(d::T, s::TSPSolution) where T
     return false
 end
 
+function lns(d::T, sol::TSPSolution, niter::Int=10) where T
+    # ugly! is there an elegant Julia solution without writing more functions?
+    ntype = typeof(d.d[1,1])
+    #
+    checksum = zero(ntype)
+    for iter in 1:niter
+        # step 0: copy incumbent
+        tmp = copy(sol.tour)
+        unplanned = Int[]
+        # step 1: destroy
+        t = 2
+        while t < length(tmp)
+            push!(unplanned, tmp[t])
+            deleteat!(tmp, t)
+            t += 1
+        end
+        # step 2: repair
+        while length(unplanned) > 0
+            bestcost, bestfrom, bestto = typemax(ntype), 0, 0
+            for from in 1:length(unplanned), to in 1:length(tmp)-1
+                δ = dist(d, tmp[to], unplanned[from]) +
+                    dist(d, unplanned[from], tmp[to+1]) -
+                    dist(d, tmp[to], tmp[to+1])
+                if δ < bestcost
+                    bestcost, bestfrom, bestto = δ, from, to
+                end
+            end
+            # perform best found insertion
+            insert!(tmp, bestto + 1, unplanned[bestfrom])
+            deleteat!(unplanned, bestfrom)
+            checksum += bestcost
+        end
+        # step 3: move to new incumbent
+        sol.tour = tmp
+    end
+    checksum
+end
+
 function benchmark_one(data::T, solutions::Vector{TSPSolution},
                        benchmarkname::String) where T
     totaltime = 0.0
@@ -115,6 +153,8 @@ function benchmark_one(data::T, solutions::Vector{TSPSolution},
             t = @CPUelapsed n = two_opt(data, s)
         elseif lowercase(benchmarkname) == "or-opt"
             t = @CPUelapsed n = or_opt(data, s)
+        elseif lowercase(benchmarkname) == "lns"
+            t = @CPUelapsed n = lns(data, s)
         else
             throw(ArgumentError("Unknown benchmark: $benchmarkname"))
         end
