@@ -10,6 +10,8 @@ mapsize = 100
 class TSPData:
     def __init__(self, n, d):
         self.n, self.d = n, d
+        # dummy values to begin with... used for the espprc benchmark
+        self.reducedcost = [ [ float(x) for x in row ] for row in d ]
         
     def matrixstring(self):
         rows = [ ' '.join(str(x) for x in row) for row in self.d ]

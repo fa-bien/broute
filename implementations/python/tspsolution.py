@@ -89,7 +89,24 @@ class TSPSolution:
                 # step 3: move or not (in our case always move)
             self.nodes = tmp
         return checksum
-            
+
+    # rescap = capacity for each resource
+    # Each node consumes one resource per 1-bit of its binary representation,
+    # the first bit being bit 0
+    # For instance 6 consumes 1 unit of resource 1 and 1 unit of resource 2,
+    # since 6 = 2^1 + 2^2
+    def espprc(self, rescap=3):
+        tour, d, rc = self.nodes, self.data.d, self.data.reducedcost
+        # step 1: update reduced costs
+        for (i, j) in zip(tour[:-2], tour[1:-1]):
+            for k in range(self.data.n):
+                rc[k][j] = float(d[k][j] - d[i][j])
+        # step 2: initialise other DP data: list of labels, queue,
+        #                                   initial label, resources
+        # step 3: run DP
+        # step 4: return distance of cheapest label as hash value.
+        return sum(sum(x) for x in rc)
+        
     def cost(self):
         total = 0
         for i, j in zip(self.nodes[:-1], self.nodes[1:]):
