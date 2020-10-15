@@ -96,10 +96,10 @@ class TSPSolution:
     # the first bit being bit 0
     # For instance 6 consumes 1 unit of resource 1 and 1 unit of resource 2,
     # since 6 = 2^1 + 2^2
-    def espprc(self, nresources=6, resourcecapacity=3):
+    def espprc(self, nresources=6, resourcecapacity=2):
         tour, d, rc = self.nodes, self.data.d, self.data.reducedcost
         vertices = range(self.data.n)
-        maxlen = sum(d[i][j] for (i, j) in zip(tour[:-1], tour[1:]))
+        maxlen = sum(d[i][j] for (i, j) in zip(tour[:-1], tour[1:])) // 3
         # step 1: update reduced costs
         for (i, j) in zip(tour[:-2], tour[1:-1]):
             for k in range(self.data.n):
@@ -113,10 +113,12 @@ class TSPSolution:
         labels[0].append(Label())
         # step 3: run DP
         while len(Qset) > 0:
-            n = Q.pop()
+            # print('Queue:', Q)
+            n = Q.popleft()
             Qset.remove(n)
             for label in labels[n]:
-                if not label.toextend: continue
+                if not label.toextend:
+                    continue
                 for succ in vertices:
                     if succ in label.visited or succ == n: continue
                     # succ is a candidate for extension; is it length-feasible?
@@ -128,14 +130,8 @@ class TSPSolution:
                             rfeas = False
                             break
                     if not rfeas: continue
-
-                    print('Extending ', label, ' to ', succ)
-                    
                     # now we can actually extend the label!
                     nl = label.extend(succ, rc, d)
-
-                    print('\tnew label: ', nl)
-                    
                     # Let's update dominance
                     added = updatedominance(labels[succ], nl)
                     if added and not (succ in Qset) and succ != 0:
@@ -143,11 +139,7 @@ class TSPSolution:
                         Q.append(succ)
                 label.toextend = False
         # step 4: return distance of cheapest label as hash value.
-        print('Labels at node 0:')
-        for l in labels[0]:
-            print(l)
-            sys.exit(9)
-        return sum(sum(x) for x in rc)
+        return min(label.cost for label in labels[0])
 
     def cost(self):
         total = 0
@@ -196,6 +188,9 @@ class Label:
     def dominates(self, other):
         if self.cost > other.cost or self.length > other.length:
             return False
+        for v in self.visited:
+            if not v in other.visited:
+                return False
         for s, o in zip(self.q, other.q):
             if s > o:
                 return False
