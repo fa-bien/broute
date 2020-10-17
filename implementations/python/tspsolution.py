@@ -117,7 +117,7 @@ class TSPSolution:
             n = Q.popleft()
             Qset.remove(n)
             for label in labels[n]:
-                if not label.toextend:
+                if label.ignore:
                     continue
                 for succ in vertices:
                     if succ in label.visited or succ == n: continue
@@ -137,7 +137,7 @@ class TSPSolution:
                     if added and not (succ in Qset) and succ != 0:
                         Qset.add(succ)
                         Q.append(succ)
-                label.toextend = False
+                label.ignore = True
         # step 4: return distance of cheapest label as hash value.
         return min(label.cost for label in labels[0])
 
@@ -157,9 +157,10 @@ def updatedominance(labels, newlabel):
         if labels[i].dominates(newlabel):
             return False
         elif newlabel.dominates(labels[i]):
+            labels[i].marksuccessors()
             if i < len(labels) - 1:
                 labels[i] = labels[-1]
-            del labels[i]
+            del labels[-1]
         else:
             i += 1
     # at this point no label has dominated newlabel so we add it
@@ -175,13 +176,15 @@ class Label:
         # already visited nodes
         self.visited = set()
         # has this label already been extended?
-        self.toextend = True
+        self.ignore = False
         # predecessor; should point to a Label
         self.pred = self
         self.cost = 0
         self.length = 0
         # resource consumption
         self.q = [0 for x in self.resources]
+        # successors for later recursive deletion when dominated
+        self.successors = []
 
     # Returns True if self dominates other
     # pre-condition: self.at == other.at
@@ -207,6 +210,8 @@ class Label:
         # resource is consumed if i^th bit of vertex is 1
         nl.q = [ r + 1 if (vertex & (1 << i) > 0) else r
                  for i, r in enumerate(self.q) ]
+        #
+        self.successors.append(nl)
         return nl
 
     def __repr__(self):
@@ -220,3 +225,8 @@ class Label:
             + '\tcost = ' + str(self.cost) + '\tlength = ' + str(self.length) \
             + '\tq = ' + str(self.q) \
             + '\tsequence = ' + str(seq)
+
+    def marksuccessors(self):
+        for s in self.successors:
+            s.ignore = True
+            s.marksuccessors()
