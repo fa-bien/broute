@@ -10,8 +10,13 @@ mapsize = 100
 class TSPData:
     def __init__(self, n, d):
         self.n, self.d = n, d
-        # dummy values to begin with... used for the espprc benchmark
-        self.reducedcost = [ [ float(x) for x in row ] for row in d ]
+        # auxiliary graph used e.g. for storing reduced costs (espprc)
+        # or flow values (maxflow)
+        # Typically it is used many times but only needs to be allocated once
+        # and represents some kind of input data, therefore this is a good
+        # place to have it.
+        # dummy values to begin with...
+        self.aux = [ [ float(x) for x in row ] for row in d ]
         
     def matrixstring(self):
         rows = [ ' '.join(str(x) for x in row) for row in self.d ]
