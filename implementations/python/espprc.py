@@ -1,82 +1,5 @@
 import collections
 
-class ESPPRC:
-    def __init__(self, n, d, rc, tour, nresources, resourcecapacity, maxlen):
-        self.n = n
-        self.d = d
-        self.rc = rc
-        # update reduced costs
-        dual = [ 0.0 for x in range(n) ]
-        for (i, j) in zip(tour[:-2], tour[1:-1]):
-            dual[j] = d[i][j]
-        for i in range(n):
-            for j in range(n):
-                rc[i][j] = float(d[i][j] - dual[j])
-        self.nresources = nresources
-        self.rescap = resourcecapacity
-        self.maxlen = maxlen
-        
-    def solve(self):
-        # initialise DP data: list of labels, queue, initial label, resources
-        vertices = [ x for x in range(self.n) ]
-        Q, Qset = collections.deque(), set([0])
-        Q.append(0)
-        labels = [ [] for x in vertices ]
-        Label.resources = [ x for x in range(self.nresources) ]
-        labels[0].append(Label())
-        # step 3: run DP
-        while len(Qset) > 0:
-            # print('Queue:', Q)
-            n = Q.popleft()
-            Qset.remove(n)
-            for label in labels[n]:
-                if label.ignore:
-                    continue
-                for succ in vertices:
-                    if succ in label.visited or succ == n: continue
-                    # succ is a candidate for extension; is it length-feasible?
-                    if label.length + self.d[n][succ] + self.d[succ][0] \
-                       > self.maxlen:
-                        continue
-                    # is it resource-feasible?
-                    rfeas = True
-                    for i, r in enumerate(label.q):
-                        if (succ & (1 << i) > 0) and r + 1 > self.rescap:
-                            rfeas = False
-                            break
-                    if not rfeas: continue
-                    # now we can actually extend the label!
-                    nl = label.extend(succ, self.rc, self.d)
-                    # Let's update dominance
-                    added = updatedominance(labels[succ], nl)
-                    if added and not (succ in Qset) and succ != 0:
-                        Qset.add(succ)
-                        Q.append(succ)
-                label.ignore = True
-        # step 4: return distance of cheapest label as hash value.
-        return min(label.cost for label in labels[0])
-        
-
-# * compare newlabel with collection of labels removing dominated labels as
-#   necessary
-# * adds newlabels to collection labels if it is not dominated
-# * returns true if newlabel was added
-def updatedominance(labels, newlabel):
-    i = 0
-    while i < len(labels):
-        if labels[i].dominates(newlabel):
-            return False
-        elif newlabel.dominates(labels[i]):
-            labels[i].marksuccessors()
-            if i < len(labels) - 1:
-                labels[i] = labels[-1]
-            del labels[-1]
-        else:
-            i += 1
-    # at this point no label has dominated newlabel so we add it
-    labels.append(newlabel)
-    return True
-    
 class Label:
     resources = []
     # construct an initial label corresponding to an empty path
@@ -140,3 +63,72 @@ class Label:
         for s in self.successors:
             s.ignore = True
             s.marksuccessors()
+
+# * compare newlabel with collection of labels removing dominated labels as
+#   necessary
+# * adds newlabel to collection labels if it is not dominated
+# * returns true if newlabel was added
+def updatedominance(labels, newlabel):
+    i = 0
+    while i < len(labels):
+        if labels[i].dominates(newlabel):
+            return False
+        elif newlabel.dominates(labels[i]):
+            labels[i].marksuccessors()
+            if i < len(labels) - 1:
+                labels[i] = labels[-1]
+            del labels[-1]
+        else:
+            i += 1
+    # at this point no label has dominated newlabel so we add it
+    labels.append(newlabel)
+    return True
+    
+class ESPPRC:
+    def __init__(self, n, d, rc, tour, nresources, resourcecapacity, maxlen):
+        self.n = n
+        self.d = d
+        self.rc = rc
+        self.nresources = nresources
+        self.rescap = resourcecapacity
+        self.maxlen = maxlen
+        
+    def solve(self):
+        # initialise DP data: list of labels, queue, initial label, resources
+        vertices = [ x for x in range(self.n) ]
+        Q, Qset = collections.deque(), set([0])
+        Q.append(0)
+        labels = [ [] for x in vertices ]
+        Label.resources = [ x for x in range(self.nresources) ]
+        labels[0].append(Label())
+        # step 3: run DP
+        while len(Qset) > 0:
+            # print('Queue:', Q)
+            n = Q.popleft()
+            Qset.remove(n)
+            for label in labels[n]:
+                if label.ignore:
+                    continue
+                for succ in vertices:
+                    if succ in label.visited or succ == n: continue
+                    # succ is a candidate for extension; is it length-feasible?
+                    if label.length + self.d[n][succ] + self.d[succ][0] \
+                       > self.maxlen:
+                        continue
+                    # is it resource-feasible?
+                    rfeas = True
+                    for i, r in enumerate(label.q):
+                        if (succ & (1 << i) > 0) and r + 1 > self.rescap:
+                            rfeas = False
+                            break
+                    if not rfeas: continue
+                    # now we can actually extend the label!
+                    nl = label.extend(succ, self.rc, self.d)
+                    # Let's update dominance
+                    added = updatedominance(labels[succ], nl)
+                    if added and not (succ in Qset) and succ != 0:
+                        Qset.add(succ)
+                        Q.append(succ)
+                label.ignore = True
+        # step 4: return distance of cheapest label as hash value.
+        return min(label.cost for label in labels[0])
