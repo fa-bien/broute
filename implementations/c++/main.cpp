@@ -64,6 +64,10 @@ benchmark_one(vector<TSPSolution<T> > solutions, string benchmarkname) {
 	    n = solutions[i].or_opt();
 	} else if (benchmarkname == "lns") {
 	    n = solutions[i].lns();
+	} else if (benchmarkname == "espprc") {
+	    n = solutions[i].espprc(6, 1);
+	} else if (benchmarkname == "espprc-2") {
+	    n = solutions[i].espprc(6, 2);
 	} else {
 	    cerr << "Unknown benchmark: " << benchmarkname << endl;
 	    exit(2);

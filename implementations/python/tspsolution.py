@@ -96,8 +96,8 @@ class TSPSolution:
     # the first bit being bit 0
     # For instance 6 consumes 1 unit of resource 1 and 1 unit of resource 2,
     # since 6 = 2^1 + 2^2
-    def espprc(self, nresources=6, resourcecapacity=2):
-        n, tour, d, rc = self.data.n, self.nodes, self.data.d, self.data.rc
+    def espprc(self, nresources=6, resourcecapacity=1):
+        n, tour, d, rc = self.data.n, self.nodes, self.data.d, self.data.aux
         # update reduced costs
         dual = [ 0.0 for x in range(n) ]
         for (i, j) in zip(tour[:-1], tour[1:]):
@@ -105,7 +105,9 @@ class TSPSolution:
         for i in range(n):
             for j in range(n):
                 rc[i][j] = float(d[i][j] - dual[j])
-        maxlen = sum(d[i][j] for (i, j) in zip(tour[:-1], tour[1:])) // 3
+        # max len: sum of best assignments
+        maxlen = sum([ min([d[i][j] for i in range(n) if i != j])
+                       for i in range(n)])
         e = espprc.ESPPRC(n, d, rc,
                           self.nodes, nresources, resourcecapacity, maxlen)
         return e.solve()

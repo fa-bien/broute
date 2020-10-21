@@ -14,101 +14,237 @@ protected:
     // where we're at
     int at_;
     // already visited nodes
-    set<int> visited_;
+    vector<bool> visited_;
     // has this label already been extended?
     bool ignore_;
     // predecessor label
-    shared_ptr<Label> pred_;
+    shared_ptr<Label<T>> pred_;
     //
     double cost_;
     T length_;
     // resource consumption
     vector<int> q_;
     // successors for later recursive deletion when dominated
-    vector<shared_ptr<Label>> successors_;
+    vector<shared_ptr<Label<T>>> successors_;
+
+public:
 
     // number of resources considered
     static int nresources;
 
     // number of vertices (also gives dimension of cost/len matrix)
     static int nnodes;
-    
-public:
+
+    // create an initial dummy label
     Label() {
         at_ = 0;
-	visited_ = set<int>();
+	visited_ = vector<bool>(nnodes, false);
         ignore_ = false;
-	pred_ = make_shared(*this);
+	pred_ = nullptr;
         cost_ = 0.0;
         length_ = 0;
 	q_ = vector<int>(nresources, 0);
-	successors_ = vector<shared_ptr<Label>>();
+	successors_ = vector<shared_ptr<Label<T>>>(0);
     }
 
-    bool dominates(const Label &other) {
+    Label(const Label<T> &l) {
+	at_ = l.at_;
+	visited_ = l.visited_;
+        ignore_ = l.ignore_;
+	pred_ = l.pred_;
+        cost_ = l.cost_;
+        length_ = l.length_;
+	q_ = l.q_;
+	successors_ = vector<shared_ptr<Label<T>>>(0);
+    }
+    
+    const bool dominates (const Label<T> &other) const {
 	if (cost_ > other.cost_ || length_ > other.length_) return false;
-	for(auto v: visited_) {
-	    if (other.visited_.find(v) == other.visited_.end()) return false;
+	for(int i=0; i < nnodes; i++) {
+	    if (visited_[i] && ! other.visited_[i]) return false;
 	}
-	for (unsigned int i=0; i < nresources; i++) {
+	for (int i=0; i < nresources; i++) {
 	    if (q_[i] > other.q_[i]) return false;
 	}
 	return true;
     }
 
-    Label extend(int vertex, int *rc, int *d) {
-	Label nl();
-	nl.at = vertex;
-	nl.pred = make_shared(*this);
-	nl.visited_ = visited_;
-	nl.visited_.insert(vertex);
-	nl.cost_ = cost_ + rc[at_ * nnodes + vertex];
-	nl.length_ = length_ + d[at_ * nnodes + vertex];
-	nl.q_ = q_;
-	for (unsigned int r=0; r < nresources; r++) {
-	    if (vertex & (1 << r) > 0) q_[r] += 1;
+    // constructor by extension
+    Label(shared_ptr<Label<T>> pred, int vertex, double *rc, const T *d) {
+	ignore_ = false;
+	at_ = vertex;
+	pred_ = pred;
+	visited_ = pred->visited_;
+	visited_[vertex] = true;
+	cost_ = pred->cost_ + rc[pred->at_ * nnodes + vertex];
+	length_ = pred->length_ + d[pred->at_ * nnodes + vertex];
+	q_ = pred->q_;
+	for (int r=0; r < nresources; r++) {
+	    if ((vertex & (1 << r)) > 0) {
+		q_[r] += 1;
+	    }
 	}
-	successors_.push_back(make_shared(*this));
-	return nl;
     }
 
-    void markSuccessors() {
+    void addsuccessor(shared_ptr<Label<T>> successor) {
+	successors_.push_back(successor);
+    }
+
+    bool ignore() const { return ignore_; }
+    void setignore() { ignore_ = true; }
+
+    bool visits(int n) const { return visited_[n]; }
+
+    T length() const { return length_; }
+    double cost() const { return cost_; }
+    int at() const { return at_; }
+
+    int getrusage(int r) const { return q_[r]; }
+
+    shared_ptr<Label> predecessor() const { return pred_; }
+    vector<shared_ptr<Label>> successors() const { return successors_; }
+    
+    void marksuccessors() {
 	for (auto s: successors_) {
 	    s->ignore_ = true;
-	    s-> markSuccessors();
+	    s->marksuccessors();
 	}
     }
 
+    // update labels with newlabel, i.e. remove dominated elements as needed.
+    // return true if newlabel is added, false otherwise
+    static bool update(vector<shared_ptr<Label<T>>> &labels,
+		       const Label<T> &newlabel) {
+	unsigned int i=0;
+	while (i < labels.size()) {
+	    if (labels[i]->dominates(newlabel)) {
+		return false;
+	    }
+	    if (newlabel.dominates(*(labels[i]))) {
+		labels[i]->marksuccessors();
+		if (i < labels.size() - 1) {
+		    labels[i] = labels.back();
+		}
+		labels.pop_back();
+	    } else {
+		i += 1;
+	    }
+	}
+	// at this point newlabel is not dominated so we add it
+	labels.push_back(make_shared<Label<T>>(newlabel));
+	return true;
+    }
 };
 
+template<class T>
+ostream& operator<<(ostream &os, const Label<T> &l) {
+    os << "Label at node " << l.at() << "\tcost = " << l.cost()
+       << "\tlength = " << l.length() << "\trusage:";
+    for (int i=0; i < Label<T>::nresources; i++) {
+	os << " " << l.getrusage(i);
+    }
+    os << "\tvisited:";
+    for (int i=0; i < Label<T>::nnodes; i++) {
+	if (l.visits(i)) { cout << " " << i; }
+    }
+    os << "\tignore = " << l.ignore()
+       << "\t successors: " << l.successors().size();
+    return os;
+}
+
+// it's 2020, C++ still requires global definition of class variables
+// this is why we can't have nice things
+template<class T> int Label<T>::nresources = 0;
+template<class T> int Label<T>::nnodes = 0;
 
 template <class T> class ESPPRC {
 protected:
     int nnodes_;
     // reduced cost flat matrix
-    int *rc_;
+    double *rc_;
     // length flat matrix
-    T *d_;
+    const T *d_;
     // number of resources considered for resource constraints
     int nresources_;
     // capacity for each resource
     int resourcecapacity_;
+    // maximum length for any given tour
+    T maxlen_;
     
 public:
-    ESPPRC(int nnodes, int *rc, int *d, int nresources, int resourcecapacity) {
+    ESPPRC(int nnodes, double *rc, const T *d,
+	   int nresources, int rescap, T maxlen) {
 	nnodes_ = nnodes;
-	rc_ = rc;
 	d_ = d;
+	rc_ = rc;
 	nresources_ = nresources;
-	resourcecapacity_ = resourcecapacity;
+	resourcecapacity_ = rescap;
+	maxlen_ = maxlen;
     }
 
-    int solve(int maxlen){
+    int solve(){
+	// set class variables
 	Label<T>::nresources = nresources_;
 	Label<T>::nnodes = nnodes_;
-	Label<T> l();
-	//
-	return 0;
+	// initial label (empty path) and queue
+	Label<T> l;
+	deque<int> Q;
+	vector<bool> inQ(nnodes_, false);
+	Q.push_back(0);
+	inQ[0] = true;
+	vector<vector<shared_ptr<Label<T>>>>
+	    labels(nnodes_, vector<shared_ptr<Label<T>>>(0));
+	labels[0].push_back(make_shared<Label<T>>(l));
+	// main DP loop
+	while (! Q.empty()) {
+	    int n = Q.front();
+	    Q.pop_front();
+	    inQ[n] = false;
+	    for (auto label: labels[n]) {
+		if (label->ignore()) {
+		    continue;
+		}
+		for (int succ = 0; succ < nnodes_; succ++) {
+		    if (label->visits(succ) || succ == n) {
+			continue;
+		    }
+                    // succ is a candidate for extension; is it length-feasible?
+                    if (label->length()
+			+ d_[n*nnodes_+succ] + d_[succ*nnodes_] > maxlen_) {
+			continue;
+		    }
+		    // is it resource-feasible ?
+		    bool rfeas = true;
+		    for (int i=0; i < nresources_; i++) {
+			if ( (succ & (1 << i)) > 0 &&
+			     label->getrusage(i) + 1 > resourcecapacity_ ) {
+			    rfeas = false;
+			    break;
+			}
+		    }
+		    if (! rfeas) {
+			continue;
+		    }		    
+		    // at this point we know the extension is feasible
+		    Label<T> nl(label, succ, rc_, d_);
+		    auto ptr = make_shared<Label<T>>(nl);
+		    label->addsuccessor(ptr);
+		    bool added = Label<T>::update(labels[succ], nl);
+		    if (added && (! inQ[succ]) && succ != 0) {
+			Q.push_back(succ);
+			inQ[succ] = true;
+		    }
+		}
+		label->setignore();
+	    }
+	}
+	double bestcost = labels[0][0]->cost();
+	for (unsigned int i=1; i < labels[0].size(); i++) {
+	    if (labels[0][i]->cost() < bestcost) {
+		bestcost = labels[0][i]->cost();
+	    }
+	}
+	return (int) bestcost;
     }
 };
 

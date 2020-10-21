@@ -22,17 +22,23 @@ protected:
     // number of points
     unsigned int n_;
     // distance matrix
-    int *d_;
+    T *d_;
+    // auxiliary graph used for espprc and maxflow
+    double *aux_;
 
 public:
-    TSPData(int n, int *d) {n_ = n; d_ = d;}
-    // ~TSPData() { delete[] d_; }
+    TSPData(int n, int *d) {n_ = n; d_ = d; aux_ = new double[n*n]; }
+    // ~TSPData() { delete[] aux_; }
     // load data from file
     TSPData(string fname) {
     }
     // getters are here
     const T d(int i, int j) const { return d_[i*n_+j]; }
     const int n() const { return n_; }
+    const T *d() const { return d_; }
+    // used to store data for auxiliary graphs, typically needs to be
+    // allocated once then overwritten many times
+    double *aux() { return aux_; }
 };
 
 #endif
