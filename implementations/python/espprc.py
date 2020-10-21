@@ -6,9 +6,12 @@ class ESPPRC:
         self.d = d
         self.rc = rc
         # update reduced costs
+        dual = [ 0.0 for x in range(n) ]
         for (i, j) in zip(tour[:-2], tour[1:-1]):
-            for k in range(n):
-                rc[k][j] = float(d[k][j] - d[i][j])
+            dual[j] = d[i][j]
+        for i in range(n):
+            for j in range(n):
+                rc[i][j] = float(d[i][j] - dual[j])
         self.nresources = nresources
         self.rescap = resourcecapacity
         self.maxlen = maxlen
