@@ -22,15 +22,17 @@ protected:
     // number of points
     unsigned int n_;
     // distance matrix
-    int *d_;
+    T *d_;
     // distance matrix helper
-    int **dh_;
+    T **dh_;
+    // auxiliary graph for e.g. espprc
+    double *aux_;
 
 public:
-    TSPData(int n, int *d) {
+    TSPData(int n, T *d) {
 	n_ = n;
 	d_ = d;
-	dh_ = new int*[n];
+	dh_ = new T*[n];
 	for (int i=0; i < n; i++)
 	    dh_[i] = d_ + n * i;
     }
@@ -41,6 +43,10 @@ public:
     // getters are here
     const T d(int i, int j) const { return dh_[i][j]; }
     const int n() const { return n_; }
+    const T *d() const { return d_; }
+    // used to store data for auxiliary graphs, typically needs to be
+    // allocated once then overwritten many times
+    double *aux() { return aux_; }
 };
 
 #endif
