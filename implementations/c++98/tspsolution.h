@@ -6,6 +6,7 @@
 #include <climits>
 
 #include "tspdata.h"
+#include "espprc.h"
 
 template <class T> class TSPSolution {
 protected:
@@ -129,6 +130,44 @@ public:
 	    nodes_ = tmp;
 	}
 	return (int) checksum;
+    }
+
+    int espprc(TSPData<T> &data, int nresources=6, int resourcecapacity=1) {
+        T tourlen = 0;
+	for (unsigned int i=0; i < nodes_.size() - 1; i++) {
+	    tourlen += data.d(nodes_[i], nodes_[i+1]);
+	}
+	int maxlen = tourlen / 3;
+	int n = data.n();
+	const T *d = data.d();
+	// reduced cost graph calculation
+	double *rc = data.aux();
+	double *dual = new double[n]();
+	for (unsigned int t=0; t < nodes_.size() - 1; t++) {
+	    int i = nodes_[t];
+	    int j = nodes_[t+1];
+	    dual[j] = (double) d[i*n+j];
+	}
+	for (int i=0; i < n; i++) {
+	    for (int j=0; j < n; j++) {
+		rc[i*n+j] = d[i*n+j] - dual[j];
+	    }
+	}
+	// for the max. length constraint we use the best assignment
+	int bestassignment = 0;
+	for (int i=0; i < n; i++) {
+	    int best = d[i*n];
+	    for (int j=1; j < n; j++) {
+		if (i == j) continue;
+		if (d[i*n+j] < best) {
+		    best = d[i*n+j];
+		}
+	    }
+	    bestassignment += best;
+	}
+	maxlen = bestassignment;
+	ESPPRC<T> e(n, rc, d, nresources, resourcecapacity, maxlen);
+	return e.solve();
     }
     
 };

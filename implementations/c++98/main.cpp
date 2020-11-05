@@ -57,7 +57,7 @@ read_data(string fname) {
 
 // benchmark all solutions in the given vector
 template<class T> pair<int, double>
-benchmark_one(const TSPData<T> &data, vector<TSPSolution<T> > solutions,
+benchmark_one(TSPData<T> &data, vector<TSPSolution<T> > solutions,
 	      string benchmarkname) {
     int nimpr = 0;
     double total_ls = 0;
@@ -70,6 +70,10 @@ benchmark_one(const TSPData<T> &data, vector<TSPSolution<T> > solutions,
 	    n = solutions[i].or_opt(data);
 	} else if (benchmarkname == "lns") {
 	    n = solutions[i].lns(data);
+	} else if (benchmarkname == "espprc") {
+	    n = solutions[i].espprc(data, 6, 1);
+	} else if (benchmarkname == "espprc-2") {
+	    n = solutions[i].espprc(data, 6, 2);
 	} else {
 	    cerr << "Unknown benchmark: " << benchmarkname << endl;
 	    exit(2);
