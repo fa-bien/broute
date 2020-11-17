@@ -46,17 +46,6 @@ public:
 	q_ = vector<int>(nresources, 0);
 	successors_ = vector<shared_ptr<Label<T>>>(0);
     }
-
-    Label(const Label<T> &l) {
-	at_ = l.at_;
-	visited_ = l.visited_;
-        ignore_ = l.ignore_;
-	pred_ = l.pred_;
-        cost_ = l.cost_;
-        length_ = l.length_;
-	q_ = l.q_;
-	successors_ = vector<shared_ptr<Label<T>>>(0);
-    }
     
     const bool dominates (const Label<T> &other) const {
 	if (cost_ > other.cost_ || length_ > other.length_) return false;
