@@ -76,6 +76,10 @@ public class TSPBenchmark{
 		n = solutions[i].or_opt();
 	    } else if (benchmarkname.equals("lns")) {
 		n = solutions[i].lns(10);
+	    } else if (benchmarkname.equals("espprc")) {
+		n = solutions[i].espprc(6, 1);
+	    } else if (benchmarkname.equals("espprc-2")) {
+		n = solutions[i].espprc(6, 2);
 	    } else {
 		System.err.println("Unknown benchmark: <" + benchmarkname +">");
 		System.exit(2);
