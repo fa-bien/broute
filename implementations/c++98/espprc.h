@@ -47,19 +47,6 @@ public:
 	q_ = new int[nresources]();
 	successors_ = vector<Label<T>*>(0);
     }
-
-    Label(const Label<T> &l) {
-	at_ = l.at_;
-	visited_ = new bool[nnodes];
-        memcpy(visited_, l.visited_, nnodes * sizeof(bool));
-        ignore_ = l.ignore_;
-	pred_ = l.pred_;
-        cost_ = l.cost_;
-        length_ = l.length_;
-	q_ = new int[nresources];
-        memcpy(q_, l.q_, nresources * sizeof(int));
-	successors_ = vector<Label<T>*>(0);
-    }
     
     const bool dominates (const Label<T> &other) const {
 	if (cost_ > other.cost_ || length_ > other.length_) return false;
