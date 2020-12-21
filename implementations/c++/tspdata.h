@@ -27,7 +27,7 @@ protected:
     double *aux_;
 
 public:
-    TSPData(int n, int *d) {n_ = n; d_ = d; aux_ = new double[n*n]; }
+    TSPData(int n, T *d) {n_ = n; d_ = d; aux_ = new double[n*n]; }
     // ~TSPData() { delete[] aux_; }
     // load data from file
     TSPData(string fname) {

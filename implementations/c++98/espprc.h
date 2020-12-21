@@ -6,6 +6,7 @@
 #include <set>
 #include <deque>
 #include <memory>
+#include<cstring>
 
 using namespace std;
 
@@ -14,18 +15,18 @@ protected:
     // where we're at
     int at_;
     // already visited nodes
-    vector<bool> visited_;
+    bool *visited_;
     // has this label already been extended?
     bool ignore_;
     // predecessor label
-    shared_ptr<Label<T>> pred_;
+    Label<T> *pred_;
     //
     double cost_;
     T length_;
     // resource consumption
-    vector<int> q_;
+    int *q_;
     // successors for later recursive deletion when dominated
-    vector<shared_ptr<Label<T>>> successors_;
+    vector<Label<T>*> successors_;
 
 public:
 
@@ -38,13 +39,13 @@ public:
     // create an initial dummy label
     Label() {
         at_ = 0;
-	visited_ = vector<bool>(nnodes, false);
+	visited_ = new bool[nnodes]();
         ignore_ = false;
-	pred_ = nullptr;
+	pred_ = NULL;
         cost_ = 0.0;
         length_ = 0;
-	q_ = vector<int>(nresources, 0);
-	successors_ = vector<shared_ptr<Label<T>>>(0);
+	q_ = new int[nresources]();
+	successors_ = vector<Label<T>*>(0);
     }
     
     const bool dominates (const Label<T> &other) const {
@@ -59,15 +60,17 @@ public:
     }
 
     // constructor by extension
-    Label(shared_ptr<Label<T>> pred, int vertex, double *rc, const T *d) {
+    Label(Label<T> *pred, int vertex, double *rc, const T *d) {
 	ignore_ = false;
 	at_ = vertex;
 	pred_ = pred;
-	visited_ = pred->visited_;
+	visited_ = new bool[nnodes];
+        memcpy(visited_, pred->visited_, nnodes * sizeof(bool));
 	visited_[vertex] = true;
 	cost_ = pred->cost_ + rc[pred->at_ * nnodes + vertex];
 	length_ = pred->length_ + d[pred->at_ * nnodes + vertex];
-	q_ = pred->q_;
+	q_ = new int[nresources];
+        memcpy(q_, pred_->q_, nresources * sizeof(int));
 	for (int r=0; r < nresources; r++) {
 	    if ((vertex & (1 << r)) > 0) {
 		q_[r] += 1;
@@ -75,7 +78,7 @@ public:
 	}
     }
 
-    void addsuccessor(shared_ptr<Label<T>> successor) {
+    void addsuccessor(Label<T> *successor) {
 	successors_.push_back(successor);
     }
 
@@ -90,26 +93,26 @@ public:
 
     int getrusage(int r) const { return q_[r]; }
 
-    shared_ptr<Label> predecessor() const { return pred_; }
-    vector<shared_ptr<Label>> successors() const { return successors_; }
+    Label<T> *predecessor() const { return pred_; }
+    vector<Label<T>*> successors() const { return successors_; }
     
     void marksuccessors() {
-	for (auto s: successors_) {
-	    s->ignore_ = true;
-	    s->marksuccessors();
+	for (unsigned int s=0; s < successors_.size(); s++) {
+	    successors_[s]->ignore_ = true;
+	    successors_[s]->marksuccessors();
 	}
     }
 
     // update labels with newlabel, i.e. remove dominated elements as needed.
     // return true if newlabel is added, false otherwise
-    static bool update(vector<shared_ptr<Label<T>>> &labels,
-		       const Label<T> &newlabel) {
+    static bool update(vector<Label<T>*> &labels,
+		       Label<T> *newlabel) {
 	unsigned int i=0;
 	while (i < labels.size()) {
-	    if (labels[i]->dominates(newlabel)) {
+	    if (labels[i]->dominates(*newlabel)) {
 		return false;
 	    }
-	    if (newlabel.dominates(*(labels[i]))) {
+	    if (newlabel->dominates(*(labels[i]))) {
 		labels[i]->marksuccessors();
 		if (i < labels.size() - 1) {
 		    labels[i] = labels.back();
@@ -120,7 +123,7 @@ public:
 	    }
 	}
 	// at this point newlabel is not dominated so we add it
-	labels.push_back(make_shared<Label<T>>(newlabel));
+	labels.push_back(newlabel);
 	return true;
     }
 };
@@ -176,20 +179,21 @@ public:
 	Label<T>::nresources = nresources_;
 	Label<T>::nnodes = nnodes_;
 	// initial label (empty path) and queue
-	Label<T> l;
+	Label<T> *l = new Label<T>();
 	deque<int> Q;
-	vector<bool> inQ(nnodes_, false);
+        bool *inQ = new bool[nnodes_]();
 	Q.push_back(0);
 	inQ[0] = true;
-	vector<vector<shared_ptr<Label<T>>>>
-	    labels(nnodes_, vector<shared_ptr<Label<T>>>(0));
-	labels[0].push_back(make_shared<Label<T>>(l));
+	vector<Label<T>*> *labels = new vector<Label<T>*>[nnodes_]();
+        //(nnodes_, vector<shared_ptr<Label<T>>>(0));
+	labels[0].push_back(l);
 	// main DP loop
 	while (! Q.empty()) {
 	    int n = Q.front();
 	    Q.pop_front();
 	    inQ[n] = false;
-	    for (auto label: labels[n]) {
+	    for (unsigned int lindex=0; lindex < labels[n].size(); lindex++) {
+                Label<T> *label = labels[n][lindex];
 		if (label->ignore()) {
 		    continue;
 		}
@@ -215,9 +219,8 @@ public:
 			continue;
 		    }		    
 		    // at this point we know the extension is feasible
-		    Label<T> nl(label, succ, rc_, d_);
-		    auto ptr = make_shared<Label<T>>(nl);
-		    label->addsuccessor(ptr);
+		    Label<T> *nl = new Label<T>(label, succ, rc_, d_);
+		    label->addsuccessor(nl);
 		    bool added = Label<T>::update(labels[succ], nl);
 		    if (added && (! inQ[succ]) && succ != 0) {
 			Q.push_back(succ);
@@ -233,6 +236,12 @@ public:
 		bestcost = labels[0][i]->cost();
 	    }
 	}
+        // free memory
+        for (int n=0; n < nnodes_; n++) {
+            for (unsigned int i=0; i < labels[n].size(); i++) {
+                free(labels[n][i]);
+            }
+        }
 	return (int) bestcost;
     }
 };

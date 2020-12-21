@@ -106,7 +106,7 @@ class TSPSolution:
             for j in range(n):
                 rc[i][j] = float(d[i][j] - dual[j])
         # max len: sum of best assignments
-        maxlen = sum([ min([d[i][j] for i in range(n) if i != j])
+        maxlen = sum([ min([d[i][j] for j in range(1,n) if i != j])
                        for i in range(n)])
         e = espprc.ESPPRC(n, d, rc,
                           self.nodes, nresources, resourcecapacity, maxlen)
