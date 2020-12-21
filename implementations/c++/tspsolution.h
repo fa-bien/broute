@@ -167,8 +167,8 @@ public:
 	// for the max. length constraint we use the best assignment
 	int bestassignment = 0;
 	for (int i=0; i < n; i++) {
-	    int best = d[i*n];
-	    for (int j=1; j < n; j++) {
+	    int best = INT_MAX;
+	    for (int j=0; j < n; j++) {
 		if (i == j) continue;
 		if (d[i*n+j] < best) {
 		    best = d[i*n+j];

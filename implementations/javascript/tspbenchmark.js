@@ -4,6 +4,7 @@
 function TSPData(n, d) {
     this.n = n;
     this.dist = d;
+    this.aux = new Array(d.length);
 
     this.d = function(i, j) {
 	return this.dist[i * this.n + j];
@@ -120,8 +121,190 @@ function TSPSolution(data, sequence) {
 	}
 	return checksum;
     }
-    
+
+    // ESPPRC
+    this.espprc = function(nresources=6, resourcecapacity=1) {
+        var tourlen = 0;
+        for (var i=0; i < tour.length -1; i++) {
+            tourlen += d.d(tour[i], tour[i+1]);
+        }
+        var dual = new Array(data.n);
+        var rc = data.aux;
+        var n = data.n;
+        for (var t=0; t < tour.length -1; t++) {
+            var i = tour[t];
+            var j = tour[t+1];
+            dual[j] = d.d(i, j);
+        }
+        for (var i=0; i < data.n; i++) {
+            for (var j=0; j < data.n; j++) {
+                rc[i*n+j] = d.dist[i*n+j] - dual[j];
+            }
+        }
+        var bestassignment = 0;
+        for (var i=0; i < n; i++) {
+            var best = Number.MAX_SAFE_INTEGER;
+            for (var j=0; j < n; j++) {
+                if (i == j) continue;
+                if (d.d(i, j) < best) {
+                    best = d.d(i, j);
+                }
+            }
+            bestassignment += best;
+        }
+        var maxlen = bestassignment;
+        var e = new ESPPRC(n, rc, d.dist, nresources, resourcecapacity, maxlen);
+        return e.solve();
+    }
 }
+
+function ESPPRC(n, rc, d, nresources, resourcecapacity, maxlen) {
+    this.n = n;
+    this.rc = rc;
+    this.d = d;
+    this.nresources = nresources;
+    this.resourcecapacity = resourcecapacity;
+    this.maxlen = maxlen;
+    
+    this.solve = function() {
+        var Q = new Array();
+        var inQ = new Array(n);
+        for (var i=0; i < n; i++) {
+            inQ[i] = false;
+        }
+        labels = new Array(n);
+        for (var i=0; i < n; i++) {
+            labels[i] = new Array();
+        }
+        Q.push(0)
+        inQ[0] = true;
+        labels[0].push(emptyLabel());
+        while (Q.length > 0) {
+            var t = Q.shift();
+            inQ[t] = false;
+            for (label of labels[t]) {
+                if (label.ignore) continue;
+                for (var succ=0; succ < n; succ++) {
+                    if (label.visits[succ] || succ == t) continue;
+                    // succ is a candidate for extension; is it length-feasible?
+                    if (label.length + d[t*n+succ] + d[succ*n] >
+                        maxlen)
+                        continue;
+                    // is it resource-feasible?
+                    var rfeas = true;
+                    for (var r=0; r < this.nresources; r++) {
+                        if ( (succ & (1 << r)) > 0 &&
+                             label.q[r] + 1 > resourcecapacity ) {
+                            rfeas = false;
+                            break;
+                        }
+                    }
+                    if (! rfeas) continue;
+                    // at this point we know the extension is feasible
+                    nl = label.extend(succ);
+                    label.addsuccessor(nl);
+                    var added = update(labels[succ], nl);
+                    if ( added && ( ! inQ[succ] && succ != 0 ) ) {
+                        Q.push(succ);
+                        inQ[succ] = true;
+                    }
+                }
+                label.ignore=true;
+            }
+        }
+        var bestcost = labels[0][0].cost;
+        for (var i=1; i < labels[0].length; i++) {
+            if (labels[0][i].cost < bestcost) {
+                bestcost = labels[0][i].cost;
+            }
+        }
+        return bestcost;
+    }
+
+    function Label(at, visits, pred, cost, length, q) {
+        this.at = at;
+        this.visits = visits;
+        this.pred = pred;
+        this.cost = cost;
+        this.length = length;
+        this.q = q;
+        this.ignore = false;
+        this.successors = new Array();
+
+        this.dominates = function(other) {
+            if (this.cost > other.cost || this.length > other.length)
+                return false;
+            for (var i=0; i < n; i++) {
+                if (this.visits[i] && ! other.visits[i]) return false;
+            }
+            for (var r=0; r < nresources; r++) {
+                if (this.q[r] > other.q[r]) return false;
+            }
+            return true;
+        }
+
+        this.extend = function(to) {
+            var visits = this.visits.slice();
+            visits[to] = true;
+            var q = this.q.slice();
+	    for (var r=0; r < nresources; r++) {
+	        if ((to & (1 << r)) > 0) {
+		    q[r] += 1;
+	        }
+	    }
+            var nl = new Label(to,
+                               visits,
+                               this,
+                               this.cost + rc[this.at*n+to],
+                               this.length + d[this.at*n+to],
+                               q);
+            return nl;
+        }
+        
+        this.addsuccessor = function(successor) {
+            this.successors.push(successor);
+        }
+
+        this.marksuccessors = function() {
+            for (succ of this.successors) {
+                succ.ignore = true;
+                succ.marksuccessors();
+            }
+        }
+    }
+    
+    function emptyLabel() {
+        visits = new Array(n);
+        for (var i=0; i < n; i++) visits[i] = false;
+        q = new Array(nresources);
+        for (var r=0; r < nresources; r++) q[r] = 0;
+        return new Label(0, visits, null, 0, 0, q);
+    }
+
+    // update labels with newlabel, i.e. remove dominated elements as needed.
+    // return true if newlabel is added, false otherwise
+    function update(labels, newlabel) {
+	var i=0;
+	while (i < labels.length) {
+	    if (labels[i].dominates(newlabel)) {
+		return false;
+	    }
+	    if (newlabel.dominates(labels[i])) {
+		labels[i].marksuccessors();
+		if (i < labels.length - 1) {
+		    labels[i] = labels[labels.length-1];
+		}
+		labels.pop();
+	    } else {
+		i += 1;
+	    }
+	}
+	// at this point newlabel is not dominated so we add it
+	labels.push(newlabel);
+	return true;
+    }
+}
+
 
 // this version requires node
 function fileAsLines(fname) {
@@ -168,6 +351,10 @@ function benchmarkOne(path, benchmarkname) {
 	    n = sol.orOpt();
 	} else if (benchmarkname == 'lns') {
 	    n = sol.lns();
+	} else if (benchmarkname == 'espprc') {
+	    n = sol.espprc(6, 1);
+	} else if (benchmarkname == 'espprc-2') {
+	    n = sol.espprc(6, 2);
 	} else {
 	    console.log('Unknown benchmark: ', benchmarkname);
 	}
