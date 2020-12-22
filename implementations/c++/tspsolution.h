@@ -144,11 +144,6 @@ public:
     }
 
     int espprc(int nresources=6, int resourcecapacity=1) {
-        T tourlen = 0;
-	for (unsigned int i=0; i < nodes_.size() - 1; i++) {
-	    tourlen += data_->d(nodes_[i], nodes_[i+1]);
-	}
-	int maxlen = tourlen / 3;
 	int n = data_->n();
 	const T *d = data_->d();
 	// reduced cost graph calculation
@@ -176,7 +171,7 @@ public:
 	    }
 	    bestassignment += best;
 	}
-	maxlen = bestassignment;
+	int maxlen = bestassignment;
 	ESPPRC<T> e(n, rc, d, nresources, resourcecapacity, maxlen);
 	return e.solve();
     }
