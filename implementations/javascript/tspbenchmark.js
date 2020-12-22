@@ -124,10 +124,6 @@ function TSPSolution(data, sequence) {
 
     // ESPPRC
     this.espprc = function(nresources=6, resourcecapacity=1) {
-        var tourlen = 0;
-        for (var i=0; i < tour.length -1; i++) {
-            tourlen += d.d(tour[i], tour[i+1]);
-        }
         var dual = new Array(data.n);
         var rc = data.aux;
         var n = data.n;

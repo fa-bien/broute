@@ -130,10 +130,6 @@ public class TSPSolution {
     }
 
     public int espprc(int nResources, int resourceCapacity) {
-        int tourlen = 0;
-        for (int i=0; i < nodes_.size() -1; i++) {
-	    tourlen += data_.d(nodes_.get(i), nodes_.get(i+1));
-        }
         int n = data_.n();
         int[] d = data_.d();
         double[] rc = data_.aux();
