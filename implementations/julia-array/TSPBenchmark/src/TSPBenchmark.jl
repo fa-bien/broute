@@ -7,7 +7,11 @@ export benchmark_many
 struct TSPData{ T<:Real }
     n::Int    # number of nodes
     d::Matrix{T} # distance matrix
+    aux::Matrix{Float64}  # auxiliary graph used e.g. in column generation
 end
+
+include("tspdata.jl")
+include("espprc.jl")
 
 mutable struct TSPSolution
     tour::Vector{Int}
@@ -39,7 +43,8 @@ function read_data(fname::String, T::DataType=Int)
             push!(solutions, TSPSolution([1+parse(Int, x) for x in tokens]))
         end
     end
-    data = TSPData{T}(n, d)
+    aux = zeros(Float64, size(d))
+    data = TSPData{T}(n, d, aux)
     return data, solutions
 end
 
@@ -143,6 +148,22 @@ function lns(d::TSPData{T}, sol::TSPSolution, niter::Int=10) where T
     checksum
 end
 
+function espprc(d::T, sol::ST;
+                nresources::Int=6, resourcecapacity::Int=1) where T <: TSPData where ST <: TSPSolution
+    dual = zeros(Float64, d.n)
+    for (i, j) in zip(sol.tour[1:end-1], sol.tour[2:end])
+        dual[j] = d.d[i, j]
+    end
+    for i ∈ 1:d.n, j ∈ 1:d.n
+        d.aux[i, j] = d.d[i, j] - dual[j]
+    end
+    # max len: sum of best assignments
+    maxlen = sum( [ minimum([d.d[i, j] for j ∈ 1:d.n if i ≠ j])
+                    for i ∈ 1:d.n ] )
+    e = ESPPRC(d, nresources, resourcecapacity, maxlen)
+    solve(e)
+end
+
 function benchmark_one(data::TSPData{T}, solutions::Vector{TSPSolution},
                        benchmarkname::String) where T
     totaltime = 0.0
@@ -154,6 +175,12 @@ function benchmark_one(data::TSPData{T}, solutions::Vector{TSPSolution},
             t = @CPUelapsed n = or_opt(data, s)
         elseif lowercase(benchmarkname) == "lns"
             t = @CPUelapsed n = lns(data, s)
+        elseif lowercase(benchmarkname) == "espprc"
+            t = @CPUelapsed n = espprc(data, s,
+                                       nresources=6, resourcecapacity=1)
+        elseif lowercase(benchmarkname) == "espprc-2"
+            t = @CPUelapsed n = espprc(data, s,
+                                       nresources=6, resourcecapacity=2)
         else
             throw(ArgumentError("Unknown benchmark: $benchmarkname"))
         end
