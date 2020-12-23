@@ -153,6 +153,12 @@ knowledge of this specific JavaScript engine might allow to remove that
 performance hit, but this is clearly outside the scope of this
 study. However it is worth noting that this can be a concern in general.
 
+\section{Other notes}
+On the ESPPRC benchmark, a label needs to store information about
+which customers have already been visited in the partial path it
+represents. In Python, preliminary testing reveals that using a set of
+integers for that purpose is twice as fast as using a vector of booleans.
+
 \bibliographystyle{plain}
 \bibliography{benchmark}
 
