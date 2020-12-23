@@ -5,6 +5,7 @@ using CPUTime
 export benchmark_many
 
 include("tspdata.jl")
+include("espprc.jl")
 
 mutable struct TSPSolution
     tour::Vector{Int}
@@ -144,6 +145,22 @@ function lns(d::T, sol::TSPSolution, niter::Int=10) where T
     checksum
 end
 
+function espprc(d::T, sol::ST;
+                nresources::Int=6, resourcecapacity::Int=1) where T <: TSPData where ST <: TSPSolution
+    dual = zeros(Float64, d.n)
+    for (i, j) in zip(sol.tour[1:end-1], sol.tour[2:end])
+        dual[j] = dist(d, i, j)
+    end
+    for i ∈ 1:d.n, j ∈ 1:d.n
+        setaux!(d, i, j, dist(d, i, j) - dual[j])
+    end
+    # max len: sum of best assignments
+    maxlen = sum( [ minimum([dist(d, i, j) for j ∈ 1:d.n if i ≠ j])
+                    for i ∈ 1:d.n ] )
+    e = ESPPRC(d, nresources, resourcecapacity, maxlen)
+    solve(e)
+end
+
 function benchmark_one(data::T, solutions::Vector{TSPSolution},
                        benchmarkname::String) where T
     totaltime = 0.0
@@ -155,6 +172,12 @@ function benchmark_one(data::T, solutions::Vector{TSPSolution},
             t = @CPUelapsed n = or_opt(data, s)
         elseif lowercase(benchmarkname) == "lns"
             t = @CPUelapsed n = lns(data, s)
+        elseif lowercase(benchmarkname) == "espprc"
+            t = @CPUelapsed n = espprc(data, s,
+                                       nresources=6, resourcecapacity=1)
+        elseif lowercase(benchmarkname) == "espprc-2"
+            t = @CPUelapsed n = espprc(data, s, 6, 2,
+                                       nresources=6, resourcecapacity=2)
         else
             throw(ArgumentError("Unknown benchmark: $benchmarkname"))
         end
