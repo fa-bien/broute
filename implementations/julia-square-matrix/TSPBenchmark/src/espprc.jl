@@ -30,8 +30,8 @@ function dominates(l1::T, l2::T) where T <: Label
     if l1.cost > l2.cost || l1.length > l2.length
         return false
     end
-    for v ∈ l1.visits
-        if v ∉ l2.visits
+    for (v1, v2) in zip(l1.visits, l2.visits)
+        if v1 > v2
             return false
         end
     end

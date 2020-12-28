@@ -10,7 +10,6 @@ struct TSPData{ T<:Real }
     aux::Matrix{Float64}  # auxiliary graph used e.g. in column generation
 end
 
-include("tspdata.jl")
 include("espprc.jl")
 
 mutable struct TSPSolution
