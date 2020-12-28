@@ -157,7 +157,14 @@ study. However it is worth noting that this can be a concern in general.
 On the ESPPRC benchmark, a label needs to store information about
 which customers have already been visited in the partial path it
 represents. In Python, preliminary testing reveals that using a set of
-integers for that purpose is twice as fast as using a vector of booleans.
+integers for that purpose is twice as fast as using a vector of
+booleans. Similar preliminary testing in C++ reveals the opposite:
+using an array of booleans is faster. This is the behaviour we would
+expect in general, the observation on Python are the surprising ones
+here. There are two reasons for this expectation: (i) copying an array,
+represented in contiguous memory, can in general be performed faster
+than copying a set structure and (ii) lookup in an array is performed
+in $\cal{O}(1)$ time while lookup in a set is performed in $\cal{O}(log(n)$.
 
 \bibliographystyle{plain}
 \bibliography{benchmark}
