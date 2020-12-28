@@ -43,8 +43,6 @@ class Label:
         # resource is consumed if i^th bit of vertex is 1
         nl.q = [ r + 1 if (vertex & (1 << i) > 0) else r
                  for i, r in enumerate(self.q) ]
-        #
-        self.successors.append(nl)
         return nl
 
     def __repr__(self):
@@ -126,6 +124,8 @@ class ESPPRC:
                     nl = label.extend(succ, self.rc, self.d)
                     # Let's update dominance
                     added = updatedominance(labels[succ], nl)
+                    if added:
+                        label.successors.append(nl)
                     if added and not (succ in Qset) and succ != 0:
                         Qset.add(succ)
                         Q.append(succ)

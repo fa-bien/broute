@@ -217,8 +217,8 @@ public:
 		    // at this point we know the extension is feasible
 		    Label<T> nl(label, succ, rc_, d_);
 		    auto ptr = make_shared<Label<T>>(nl);
-		    label->addsuccessor(ptr);
 		    bool added = Label<T>::update(labels[succ], nl);
+		    if (added) label->addsuccessor(ptr);
 		    if (added && (! inQ[succ]) && succ != 0) {
 			Q.push_back(succ);
 			inQ[succ] = true;

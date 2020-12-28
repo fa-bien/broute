@@ -188,8 +188,8 @@ public class ESPPRC {
 		    }
 		    // at this point we know the extension is feasible
 		    Label nl = new Label(label, succ, rc_, d_);
-		    label.addsuccessor(nl);
 		    boolean added = Label.update(labels.get(succ), nl);
+		    if (added) label.addsuccessor(nl);
 		    if (added && (! inQ[succ]) && succ != 0) {
 			Q.addLast(succ);
 			inQ[succ] = true;

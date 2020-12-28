@@ -198,8 +198,8 @@ function ESPPRC(n, rc, d, nresources, resourcecapacity, maxlen) {
                     if (! rfeas) continue;
                     // at this point we know the extension is feasible
                     nl = label.extend(succ);
-                    label.addsuccessor(nl);
                     var added = update(labels[succ], nl);
+                    if (added) label.addsuccessor(nl);
                     if ( added && ( ! inQ[succ] && succ != 0 ) ) {
                         Q.push(succ);
                         inQ[succ] = true;

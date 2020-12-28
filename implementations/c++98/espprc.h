@@ -220,8 +220,8 @@ public:
 		    }		    
 		    // at this point we know the extension is feasible
 		    Label<T> *nl = new Label<T>(label, succ, rc_, d_);
-		    label->addsuccessor(nl);
 		    bool added = Label<T>::update(labels[succ], nl);
+		    if (added) label->addsuccessor(nl);
 		    if (added && (! inQ[succ]) && succ != 0) {
 			Q.push_back(succ);
 			inQ[succ] = true;
