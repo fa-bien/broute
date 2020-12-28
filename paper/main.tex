@@ -152,6 +152,13 @@ we re-start the program individually for each instance. Advanced
 knowledge of this specific JavaScript engine might allow to remove that
 performance hit, but this is clearly outside the scope of this
 study. However it is worth noting that this can be a concern in general.
+\subsection{Numba}
+Numba is not yet feature-complete for Numpy. A direct consequence is that some
+benchmarks cannot be implemented for Numba. For example $np.insert()$ is not
+implemented, but this function is needed for the $LN$
+benchmark. Therefore the $LNS$ benchmark cannot be implemented with
+Numba. Still, Numba is significant enough to be benchmarked and its
+current performance are an indication of what to expect in years to come.
 
 \section{Other notes}
 On the ESPPRC benchmark, a label needs to store information about
