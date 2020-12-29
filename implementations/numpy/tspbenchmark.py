@@ -38,6 +38,10 @@ def benchmarkone(solutions, benchmarkname):
         bench = lambda x: x.lns()
     elif benchmarkname == 'Or-opt':
         bench = lambda x: x.or_opt()
+    elif benchmarkname == 'espprc':
+        bench = lambda x: x.espprc(6, 1)
+    elif benchmarkname == 'espprc-2':
+        bench = lambda x: x.espprc(6, 2)
     else:
         bench = lambda x: None
     #

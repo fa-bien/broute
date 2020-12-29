@@ -4,6 +4,7 @@ from itertools import chain
 import numpy as np
 
 import tspdata
+import espprc
 
 class TSPSolution:
     def __init__(self, data, permutation):
@@ -21,8 +22,8 @@ class TSPSolution:
         tour, d = self.nodes, self.data.d
         for p1 in range(len(tour) - 3):
             for p2 in range(p1+2, len(tour) - 1):
-                if d[tour[p1]][tour[p1+1]] + d[tour[p2]][tour[p2+1]] > \
-                   d[tour[p1]][tour[p2]] + d[tour[p1+1]][tour[p2+1]]:
+                if d[tour[p1],tour[p1+1]] + d[tour[p2],tour[p2+1]] > \
+                   d[tour[p1],tour[p2]] + d[tour[p1+1],tour[p2+1]]:
                     # improving 2-exchange found
                     for i in range((p2-p1+1) // 2):
                         tour[p1+1+i], tour[p2-i] = tour[p2-i], tour[p1+1+i]
@@ -41,9 +42,9 @@ class TSPSolution:
         for i in range(1, len(tour) - 1):
             for l in range(1, 1 + min(3, len(tour)-1-i)):
                 for p in chain(range(i-1), range(i+l, len(tour)-1)):
-                    delta = d[tour[i-1]][tour[i+l]] + d[tour[p]][tour[i]] + \
-                        d[tour[i+l-1]][tour[p+1]] - d[tour[p]][tour[p+1]]\
-                        - d[tour[i-1]][tour[i]] - d[tour[i+l-1]][tour[i+l]]
+                    delta = d[tour[i-1],tour[i+l]] + d[tour[p],tour[i]] + \
+                        d[tour[i+l-1],tour[p+1]] - d[tour[p],tour[p+1]]\
+                        - d[tour[i-1],tour[i]] - d[tour[i+l-1],tour[i+l]]
                     # perform improving move
                     if delta < 0:
                         # store sequence to move
@@ -79,7 +80,7 @@ class TSPSolution:
                 bestcost, bestnode, bestfro, bestto = sys.maxsize, -1, -1, -1
                 for (fro, k) in enumerate(unplanned):
                     for ((pos, i), j) in zip(enumerate(tmp[:-1]), tmp[1:]):
-                        delta = d[i][k] + d[k][j] - d[i][j]
+                        delta = d[i,k] + d[k,j] - d[i,j]
                         if delta < bestcost:
                             bestcost, bestfro, bestto = delta, fro, pos
                 # perform best found insertion
@@ -89,6 +90,27 @@ class TSPSolution:
                 # step 3: move or not (in our case always move)
             self.nodes = tmp
         return checksum
+    
+    # Max. length constraint: current tour length is max. length
+    # Each node consumes one resource per 1-bit of its binary representation,
+    # the first bit being bit 0
+    # For instance 6 consumes 1 unit of resource 1 and 1 unit of resource 2,
+    # since 6 = 2^1 + 2^2
+    def espprc(self, nresources=6, resourcecapacity=1):
+        n, tour, d, rc = self.data.n, self.nodes, self.data.d, self.data.aux
+        # update reduced costs
+        dual = np.array([ 0.0 for x in range(n) ])
+        for (i, j) in zip(tour[:-1], tour[1:]):
+            dual[j] = d[i,j]
+        for i in range(n):
+            for j in range(n):
+                rc[i,j] = float(d[i,j] - dual[j])
+        # max len: sum of best assignments
+        maxlen = sum([ min([d[i,j] for j in range(n) if i != j])
+                       for i in range(n)])
+        e = espprc.ESPPRC(n, d, rc,
+                          self.nodes, nresources, resourcecapacity, maxlen)
+        return e.solve()
     
     def dumpstring(self):
         return str(self.nodes)
