@@ -63,10 +63,8 @@ fn benchmark_one(data: &mut tsp::TSPData, solutions: &mut Vec<tsp::TSPSolution>,
             cnt = sol.or_opt(data);
         } else if benchmarkname == "lns" {
             cnt = sol.lns(data, 10);
-        } else if benchmarkname == "espprc" {
+        } else if benchmarkname == "espprc-index" {
             cnt = sol.espprc(data, 6, 1);
-        } else if benchmarkname == "espprc-2" {
-            cnt = sol.espprc(data, 6, 2);
         } else {
             panic!("Unknown benchmark: {:?}", benchmarkname);
         }
