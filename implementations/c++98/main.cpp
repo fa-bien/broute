@@ -71,9 +71,11 @@ benchmark_one(TSPData<T> &data, vector<TSPSolution<T> > solutions,
 	} else if (benchmarkname == "lns") {
 	    n = solutions[i].lns(data);
 	} else if (benchmarkname == "espprc") {
-	    n = solutions[i].espprc(data, 6, 1);
+	    n = solutions[i].espprc(data, 6, 1, false);
 	} else if (benchmarkname == "espprc-2") {
-	    n = solutions[i].espprc(data, 6, 2);
+	    n = solutions[i].espprc(data, 6, 2, false);
+	} else if (benchmarkname == "espprc-index") {
+	    n = solutions[i].espprc(data, 6, 1, true);
 	} else {
 	    cerr << "Unknown benchmark: " << benchmarkname << endl;
 	    exit(2);
