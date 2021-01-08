@@ -101,7 +101,6 @@ class ESPPRC:
         labels[0].append(Label())
         # step 3: run DP
         while len(Qset) > 0:
-            # print('Queue:', Q)
             n = Q.popleft()
             Qset.remove(n)
             for label in labels[n]:

@@ -4,6 +4,7 @@ from itertools import chain
 
 import tspdata
 import espprc
+import maxflow
 
 class TSPSolution:
     def __init__(self, data, permutation):
@@ -112,6 +113,29 @@ class TSPSolution:
                           self.nodes, nresources, resourcecapacity, maxlen)
         return e.solve()
 
+    # max. flow
+    # arc capacity = arc cost divided by ten but only for those arcs that are
+    # above the average value of arcs with the same destination
+    def maxflow(self, algorithm='EK'):
+        n, tour, d = self.data.n, self.nodes, self.data.d
+        cap, flow = self.data.aux, self.data.aux2
+        # first we build the capacity graph
+        t = [ 0.0 for x in range(n) ]
+        for (i, j) in zip(tour[:-1], tour[1:]):
+            t[j] = d[i][j]
+        for j in range(n):
+            for i in range(n):
+                cap[i][j] = float(d[i][j]) if d[i][j] >= t[j] else 0
+        # then we solve it for each non-0 node as sink
+        checksum = 0
+        for sink in range(1, n):
+            if algorithm == 'EK':
+                mf = maxflow.edmondskarp(cap, flow, n, 0, sink)
+            elif algorithm == 'RTF':
+                mf = maxflow.relabel_to_front(cap, flow, n, 0, sink)
+            checksum += mf
+        return checksum
+    
     def cost(self):
         total = 0
         for i, j in zip(self.nodes[:-1], self.nodes[1:]):

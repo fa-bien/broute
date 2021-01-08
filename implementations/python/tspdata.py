@@ -17,6 +17,8 @@ class TSPData:
         # place to have it.
         # dummy values to begin with...
         self.aux = [ [ float(x) for x in row ] for row in d ]
+        # second auxiliary graph used to store results e.g. for maxflow
+        self.aux2 = [ [ 0 for x in row ] for row in d ]
         
     def matrixstring(self):
         rows = [ ' '.join(str(x) for x in row) for row in self.d ]
