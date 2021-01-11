@@ -123,7 +123,7 @@ function TSPSolution(data, sequence) {
     }
 
     // ESPPRC
-    this.espprc = function(nresources=6, resourcecapacity=1) {
+    this.espprc = function(nresources=6, resourcecapacity=1, index=false) {
         var dual = new Array(data.n);
         var rc = data.aux;
         var n = data.n;
@@ -149,7 +149,11 @@ function TSPSolution(data, sequence) {
             bestassignment += best;
         }
         var maxlen = bestassignment;
-        var e = new ESPPRC(n, rc, d.dist, nresources, resourcecapacity, maxlen);
+        if (! index) {
+            var e = new ESPPRC(n, rc, d.dist, nresources, resourcecapacity, maxlen);
+        } else {
+            var e = new ESPPRCLC(n, rc, d.dist, nresources, resourcecapacity, maxlen);
+        }
         return e.solve();
     }
 }
@@ -270,9 +274,9 @@ function ESPPRC(n, rc, d, nresources, resourcecapacity, maxlen) {
     }
     
     function emptyLabel() {
-        visits = new Array(n);
+        var visits = new Array(n);
         for (var i=0; i < n; i++) visits[i] = false;
-        q = new Array(nresources);
+        var q = new Array(nresources);
         for (var r=0; r < nresources; r++) q[r] = 0;
         return new Label(0, visits, null, 0, 0, q);
     }
@@ -301,6 +305,165 @@ function ESPPRC(n, rc, d, nresources, resourcecapacity, maxlen) {
     }
 }
 
+function ESPPRCLC(n, rc, d, nresources, resourcecapacity, maxlen) {
+    this.n = n;
+    this.rc = rc;
+    this.d = d;
+    this.nresources = nresources;
+    this.resourcecapacity = resourcecapacity;
+    this.maxlen = maxlen;
+    
+    this.solve = function() {
+        var Q = new Array();
+        var inQ = new Array(n);
+        for (var i=0; i < n; i++) {
+            inQ[i] = false;
+        }
+        labels = new Array(n);
+        for (var i=0; i < n; i++) {
+            labels[i] = new Array();
+        }
+        Q.push(0)
+        inQ[0] = true;
+        var lc = new LabelCollection();
+        labels[0].push(lc.emptyLabel());
+        while (Q.length > 0) {
+            var t = Q.shift();
+            inQ[t] = false;
+            for (lindex of labels[t]) {
+                var label = lc.labels[lindex];
+                if (label.ignore) continue;
+                for (var succ=0; succ < n; succ++) {
+                    if (label.visits[succ] || succ == t) continue;
+                    // succ is a candidate for extension; is it length-feasible?
+                    if (label.length + d[t*n+succ] + d[succ*n] >
+                        maxlen)
+                        continue;
+                    // is it resource-feasible?
+                    var rfeas = true;
+                    for (var r=0; r < this.nresources; r++) {
+                        if ( (succ & (1 << r)) > 0 &&
+                             label.q[r] + 1 > resourcecapacity ) {
+                            rfeas = false;
+                            break;
+                        }
+                    }
+                    if (! rfeas) continue;
+                    // at this point we know the extension is feasible
+                    nl = lc.extend(lindex, succ);
+                    var added = lc.update(labels[succ], nl);
+                    if (added) lc.addsuccessor(lindex, nl);
+                    if ( added && ( ! inQ[succ] && succ != 0 ) ) {
+                        Q.push(succ);
+                        inQ[succ] = true;
+                    }
+                }
+                label.ignore=true;
+            }
+        }
+        var bestcost = lc.labels[labels[0][0]].cost;
+        for (var i=1; i < labels[0].length; i++) {
+            if (lc.labels[labels[0][i]].cost < bestcost) {
+                bestcost = lc.labels[labels[0][i]].cost;
+            }
+        }
+        return bestcost;
+    }
+
+    function LabelCollection() {
+        this.labels = new Array();
+
+        this.emptyLabel = function() {
+            var visits = new Array(n);
+            for (var i=0; i < n; i++) visits[i] = false;
+            var q = new Array(nresources);
+            for (var r=0; r < nresources; r++) q[r] = 0;
+            this.labels.push(new Label(0, visits, -1, 0, 0, q));
+            return this.labels.length - 1;
+        }
+
+        this.extend = function(fromindex, to) {
+            this.labels.push(this.labels[fromindex].extend(fromindex, to));
+            return this.labels.length - 1;
+        }
+
+        this.addsuccessor = function(lindex, successor) {
+            this.labels[lindex].successors.push(successor);
+        }
+
+        this.marksuccessors = function(lindex) {
+            for (succ of this.labels[lindex].successors) {
+                this.labels[succ].ignore = true;
+                this.marksuccessors(succ);
+            }
+        }
+        
+        // update labels with newlabel, removing dominated elements as needed.
+        // return true if newlabel is added, false otherwise
+        this.update = function (labels, newlabel) {
+	    var i=0;
+	    while (i < labels.length) {
+	        if (this.labels[labels[i]].dominates(this.labels[newlabel])) {
+		    return false;
+	        }
+	        if (this.labels[newlabel].dominates(this.labels[labels[i]])) {
+		    this.marksuccessors(labels[i]);
+		    if (i < labels.length - 1) {
+		        labels[i] = labels[labels.length-1];
+		    }
+		    labels.pop();
+	        } else {
+		    i += 1;
+	        }
+	    }
+	    // at this point newlabel is not dominated so we add it
+	    labels.push(newlabel);
+	    return true;
+        }
+    }
+    
+    function Label(at, visits, pred, cost, length, q) {
+        this.at = at;
+        this.visits = visits;
+        this.pred = pred;
+        this.cost = cost;
+        this.length = length;
+        this.q = q;
+        this.ignore = false;
+        this.successors = new Array();
+
+        this.dominates = function(other) {
+            if (this.cost > other.cost || this.length > other.length)
+                return false;
+            for (var i=0; i < n; i++) {
+                if (this.visits[i] && ! other.visits[i]) return false;
+            }
+            for (var r=0; r < nresources; r++) {
+                if (this.q[r] > other.q[r]) return false;
+            }
+            return true;
+        }
+
+        this.extend = function(fromindex, to) {
+            var visits = this.visits.slice();
+            visits[to] = true;
+            var q = this.q.slice();
+	    for (var r=0; r < nresources; r++) {
+	        if ((to & (1 << r)) > 0) {
+		    q[r] += 1;
+	        }
+	    }
+            var nl = new Label(to,
+                               visits,
+                               fromindex,
+                               this.cost + rc[this.at*n+to],
+                               this.length + d[this.at*n+to],
+                               q);
+            return nl;
+        }
+    }
+    
+}
 
 // this version requires node
 function fileAsLines(fname) {
@@ -351,6 +514,8 @@ function benchmarkOne(path, benchmarkname) {
 	    n = sol.espprc(6, 1);
 	} else if (benchmarkname == 'espprc-2') {
 	    n = sol.espprc(6, 2);
+	} else if (benchmarkname == 'espprc-index') {
+	    n = sol.espprc(6, 1, true);
 	} else {
 	    console.log('Unknown benchmark: ', benchmarkname);
 	}
