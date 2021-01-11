@@ -21,7 +21,7 @@ if (! (reflang %in% languages)) {
 benchmarks <- c('2-opt', 'Or-opt', 'lns')
 
 ## first we glue all data together in one data frame
-fnames <- paste0(languages, '-runs.csv')
+fnames <- list.files(pattern='*.csv')
 
 print(fnames)
 
