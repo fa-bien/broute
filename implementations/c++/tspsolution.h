@@ -7,6 +7,7 @@
 
 #include "tspdata.h"
 #include "espprc.h"
+#include "espprc-index.h"
 
 template <class T> class TSPSolution {
 protected:
@@ -143,7 +144,7 @@ public:
 	return (int) checksum;
     }
 
-    int espprc(int nresources=6, int resourcecapacity=1) {
+    int espprc(int nresources=6, int resourcecapacity=1, bool index=false) {
 	int n = data_->n();
 	const T *d = data_->d();
 	// reduced cost graph calculation
@@ -172,8 +173,13 @@ public:
 	    bestassignment += best;
 	}
 	int maxlen = bestassignment;
-	ESPPRC<T> e(n, rc, d, nresources, resourcecapacity, maxlen);
-	return e.solve();
+        if (! index) {
+            ESPPRC<T> e(n, rc, d, nresources, resourcecapacity, maxlen);
+            return e.solve();
+        } else {
+            ESPPRCLC<T> e(n, rc, d, nresources, resourcecapacity, maxlen);
+            return e.solve();
+        }
     }
     
     const shared_ptr<TSPData<T> > data(){ return data_; }
