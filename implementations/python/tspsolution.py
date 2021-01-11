@@ -4,6 +4,7 @@ from itertools import chain
 
 import tspdata
 import espprc
+import espprcindex
 import maxflow
 
 class TSPSolution:
@@ -97,7 +98,7 @@ class TSPSolution:
     # the first bit being bit 0
     # For instance 6 consumes 1 unit of resource 1 and 1 unit of resource 2,
     # since 6 = 2^1 + 2^2
-    def espprc(self, nresources=6, resourcecapacity=1):
+    def espprc(self, nresources=6, resourcecapacity=1, index=False):
         n, tour, d, rc = self.data.n, self.nodes, self.data.d, self.data.aux
         # update reduced costs
         dual = [ 0.0 for x in range(n) ]
@@ -109,8 +110,13 @@ class TSPSolution:
         # max len: sum of best assignments
         maxlen = sum([ min([d[i][j] for j in range(n) if i != j])
                        for i in range(n)])
-        e = espprc.ESPPRC(n, d, rc,
-                          self.nodes, nresources, resourcecapacity, maxlen)
+        if not index:
+            e = espprc.ESPPRC(n, d, rc,
+                              self.nodes, nresources, resourcecapacity, maxlen)
+        else:
+            e = espprcindex.ESPPRCLC(n, d, rc,
+                                     self.nodes, nresources, resourcecapacity,
+                                     maxlen)
         return e.solve()
 
     # max. flow

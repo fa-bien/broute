@@ -40,6 +40,8 @@ def benchmarkone(solutions, benchmarkname):
         bench = lambda x: x.or_opt()
     elif benchmarkname == 'espprc':
         bench = lambda x: x.espprc()
+    elif benchmarkname == 'espprc-index':
+        bench = lambda x: x.espprc(index=True)
     elif benchmarkname == 'maxflow':
         bench = lambda x: x.maxflow()
     elif benchmarkname == 'maxflow-RTF':
