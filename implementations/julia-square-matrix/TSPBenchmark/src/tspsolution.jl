@@ -1,4 +1,5 @@
 include("espprc.jl")
+include("espprc-index.jl")
 
 mutable struct TSPSolution
     tour::Vector{Int}
@@ -108,7 +109,8 @@ function lns(d::T, sol::TSPSolution, niter::Int=10) where T
 end
 
 function espprc(d::T, sol::ST;
-                nresources::Int=6, resourcecapacity::Int=1) where T <: TSPData where ST <: TSPSolution
+                nresources::Int=6, resourcecapacity::Int=1,
+                index::Bool=false) where T <: TSPData where ST <: TSPSolution
     dual = zeros(Float64, d.n)
     for (i, j) in zip(sol.tour[1:end-1], sol.tour[2:end])
         dual[j] = dist(d, i, j)
@@ -120,5 +122,9 @@ function espprc(d::T, sol::ST;
     maxlen = sum( [ minimum([dist(d, i, j) for j ∈ 1:d.n if i ≠ j])
                     for i ∈ 1:d.n ] )
     e = ESPPRC(d, nresources, resourcecapacity, maxlen)
-    solve(e)
+    if ! index
+        solve(e)
+    else
+        solvewithindex(e)
+    end
 end

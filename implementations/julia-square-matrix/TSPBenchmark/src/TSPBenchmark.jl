@@ -53,8 +53,12 @@ function benchmark_one(data::T, solutions::Vector{TSPSolution},
             t = @CPUelapsed n = espprc(data, s,
                                        nresources=6, resourcecapacity=1)
         elseif lowercase(benchmarkname) == "espprc-2"
-            t = @CPUelapsed n = espprc(data, s, 6, 2,
+            t = @CPUelapsed n = espprc(data, s,
                                        nresources=6, resourcecapacity=2)
+        elseif lowercase(benchmarkname) == "espprc-index"
+            t = @CPUelapsed n = espprc(data, s,
+                                       nresources=6, resourcecapacity=1,
+                                       index=true)
         else
             throw(ArgumentError("Unknown benchmark: $benchmarkname"))
         end
