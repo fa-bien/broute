@@ -118,17 +118,17 @@ class Label {
 
 public class ESPPRC {
 
-    private int nnodes_;
+    protected int nnodes_;
     // reduced cost flat matrix
-    private double[] rc_;
+    protected double[] rc_;
     // length flat matrix
-    private int[] d_;
+    protected int[] d_;
     // number of resources considered for resource constraints
-    private int nresources_;
+    protected int nresources_;
     // capacity for each resource
-    private int resourcecapacity_;
+    protected int resourcecapacity_;
     // maximum length for any given tour
-    private int maxlen_;
+    protected int maxlen_;
     
     public ESPPRC(int nnodes, double[] rc, int[] d,
                   int nresources, int rescap, int maxlen) {

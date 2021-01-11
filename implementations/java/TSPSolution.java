@@ -129,7 +129,7 @@ public class TSPSolution {
 	return checksum;
     }
 
-    public int espprc(int nResources, int resourceCapacity) {
+    public int espprc(int nResources, int resourceCapacity, boolean index) {
         int n = data_.n();
         int[] d = data_.d();
         double[] rc = data_.aux();
@@ -156,8 +156,14 @@ public class TSPSolution {
 	    }
 	    bestassignment += best;
 	}
-        ESPPRC e = new ESPPRC(n, rc, d, nResources, resourceCapacity,
-                              bestassignment);
-	return e.solve();
+        ESPPRC e = null;
+        if (! index) {
+            e = new ESPPRC(n, rc, d, nResources, resourceCapacity,
+                           bestassignment);
+        } else {
+            e = new ESPPRCLC(n, rc, d, nResources, resourceCapacity,
+                             bestassignment);
+        }
+        return e.solve();
     }
 }
