@@ -1,11 +1,13 @@
 struct TSPData{ T<:Real }
     n::Int    # number of nodes
     d::Matrix{T} # distance matrix
-    aux::Matrix{Float64}  # auxiliary graph used e.g. in column generation
+    aux::Matrix{Float64}  # auxiliary graph used e.g. in ESPPRC
+    aux2::Matrix{Float64}  # auxiliary graph used e.g. in maxflow
 end
 
 include("espprc.jl")
 include("espprc-index.jl")
+include("maxflow.jl")
 
 mutable struct TSPSolution
     tour::Vector{Int}
@@ -38,7 +40,8 @@ function read_data(fname::String, T::DataType=Int)
         end
     end
     aux = zeros(Float64, size(d))
-    data = TSPData{T}(n, d, aux)
+    aux2 = zeros(Float64, size(d))
+    data = TSPData{T}(n, d, aux, aux2)
     return data, solutions
 end
 
@@ -146,7 +149,7 @@ function espprc(d::T, sol::ST;
                 nresources::Int=6, resourcecapacity::Int=1,
                 index::Bool=false) where T <: TSPData where ST <: TSPSolution
     dual = zeros(Float64, d.n)
-    for (i, j) in zip(sol.tour[1:end-1], sol.tour[2:end])
+    for (i, j) in @views zip(sol.tour[1:end-1], sol.tour[2:end])
         dual[j] = d.d[i, j]
     end
     for i ∈ 1:d.n, j ∈ 1:d.n
@@ -161,4 +164,20 @@ function espprc(d::T, sol::ST;
     else
         Int(trunc(solve(e)))
     end
+end
+
+function maxflow(d::T, sol::ST) where T <: TSPData where ST <: TSPSolution
+    t = zeros(Float64, d.n)
+    for (i, j) ∈ @views zip(sol.tour[1:end-1], sol.tour[2:end])
+        t[j] = d.d[i, j]
+    end
+    for i ∈ 1:d.n, j ∈ 1:d.n
+        d.aux[i, j] = if (d.d[i, j] > t[j]) d.d[i,j] else zero(Float64) end
+    end
+    checksum = zero(Float64);
+    for sink in 2:d.n
+        mf = edmondskarp(d.aux, d.aux2, d.n, 1, sink)
+        checksum += mf
+    end
+    Int(trunc(checksum))
 end

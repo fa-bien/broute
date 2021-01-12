@@ -27,6 +27,8 @@ function benchmark_one(data::TSPData{T}, solutions::Vector{TSPSolution},
             t = @CPUelapsed n = espprc(data, s,
                                        nresources=6, resourcecapacity=1,
                                        index=true)
+        elseif lowercase(benchmarkname) == "maxflow"
+            t = @CPUelapsed n = maxflow(data, s)
         else
             throw(ArgumentError("Unknown benchmark: $benchmarkname"))
         end
