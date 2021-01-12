@@ -8,6 +8,7 @@
 #include "tspdata.h"
 #include "espprc.h"
 #include "espprc-index.h"
+#include "maxflow.h"
 
 template <class T> class TSPSolution {
 protected:
@@ -170,6 +171,33 @@ public:
             ESPPRCLC<T> e(n, rc, d, nresources, resourcecapacity, maxlen);
             return (int) e.solve();
         }
+    }
+
+    int maxflow(TSPData<T> &data) {
+	int n = data.n();
+	const T *d = data.d();
+	// capacity graph
+	double *C = data.aux();
+        // flow graph
+        double *F = data.aux2();
+	vector<double> t(n, 0.0);
+	for (unsigned int k=0; k < nodes_.size() - 1; k++) {
+	    int i = nodes_[k];
+	    int j = nodes_[k+1];
+	    t[j] = (double) d[i*n+j];
+	}
+	for (int i=0; i < n; i++) {
+	    for (int j=0; j < n; j++) {
+		C[i*n+j] = d[i*n+j] > t[j] ? (double) d[i*n+j] : 0.0;
+	    }
+	}
+        // solve maxflow for each non-0 node as sink
+        double checksum = 0.0;
+        for (int sink=1; sink < n; sink++) {
+            double mf = edmondskarp(C, F, n, 0, sink);
+            checksum += mf;
+        }
+        return (int) checksum;
     }
     
 };

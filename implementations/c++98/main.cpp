@@ -76,6 +76,8 @@ benchmark_one(TSPData<T> &data, vector<TSPSolution<T> > solutions,
 	    n = solutions[i].espprc(data, 6, 2, false);
 	} else if (benchmarkname == "espprc-index") {
 	    n = solutions[i].espprc(data, 6, 1, true);
+	} else if (benchmarkname == "maxflow") {
+	    n = solutions[i].maxflow(data);
 	} else {
 	    cerr << "Unknown benchmark: " << benchmarkname << endl;
 	    exit(2);
