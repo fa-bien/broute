@@ -1,5 +1,6 @@
 include("espprc.jl")
 include("espprc-index.jl")
+include("maxflow.jl")
 
 mutable struct TSPSolution
     tour::Vector{Int}
@@ -127,4 +128,21 @@ function espprc(d::T, sol::ST;
     else
         Int(trunc(solvewithindex(e)))
     end
+end
+
+function maxflow(d::T, sol::ST) where T <: TSPData where ST <: TSPSolution
+    t = zeros(Float64, d.n)
+    for (i, j) in zip(sol.tour[1:end-1], sol.tour[2:end])
+        t[j] = dist(d, i, j)
+    end
+    for i ∈ 1:d.n, j ∈ 1:d.n
+        setaux!(d, i, j,
+                if (dist(d, i, j) > t[j]) dist(d, i, j) else zero(Float64) end)
+    end
+    checksum = zero(Float64)
+    for sink in 2:d.n
+        mf = edmondskarp(d, 1, sink)
+        checksum += mf
+    end
+    Int(trunc(checksum))
 end
