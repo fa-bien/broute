@@ -140,7 +140,7 @@ class TSPSolution:
             elif algorithm == 'RTF':
                 mf = maxflow.relabel_to_front(cap, flow, n, 0, sink)
             checksum += mf
-        return checksum
+        return int(checksum)
     
     def cost(self):
         total = 0

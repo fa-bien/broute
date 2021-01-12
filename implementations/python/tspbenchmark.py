@@ -47,7 +47,8 @@ def benchmarkone(solutions, benchmarkname):
     elif benchmarkname == 'maxflow-RTF':
         bench = lambda x: x.maxflow(algorithm='RTF')
     else:
-        bench = lambda x: None
+        sys.stderr.write('Invalid benchmark: ' + benchmarkname + '\n')
+        sys.exit(22)
     #
     nimpr = 0
     totalcputime = 0.0
