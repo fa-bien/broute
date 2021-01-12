@@ -25,9 +25,12 @@ protected:
     T *d_;
     // auxiliary graph used for espprc and maxflow
     double *aux_;
+    // second auxiliary graph
+    double *aux2_;
 
 public:
-    TSPData(int n, T *d) {n_ = n; d_ = d; aux_ = new double[n*n]; }
+    TSPData(int n, T *d) {n_ = n; d_ = d; aux_ = new double[n*n];
+        aux2_ = new double[n*n]; }
     // ~TSPData() { delete[] aux_; }
     // load data from file
     TSPData(string fname) {
@@ -39,6 +42,7 @@ public:
     // used to store data for auxiliary graphs, typically needs to be
     // allocated once then overwritten many times
     double *aux() { return aux_; }
+    double *aux2() { return aux2_; }
 };
 
 #endif
