@@ -136,5 +136,5 @@ function solvewithindex(e::ESPPRC{MT, T}) where MT <: TSPData where T <: Real
             lc.labels[lindex].ignore = true
         end
     end
-    Int(trunc(minimum(lc.labels[lindex].cost for lindex in labels[1])))
+    minimum(lc.labels[lindex].cost for lindex in labels[1])
 end

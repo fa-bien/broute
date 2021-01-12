@@ -140,7 +140,7 @@ public class ESPPRC {
 	maxlen_ = maxlen;
     }
 
-    public int solve(){
+    public double solve(){
 	// set class variables
 	Label.nresources = nresources_;
 	Label.nnodes = nnodes_;
@@ -204,6 +204,6 @@ public class ESPPRC {
 		bestcost = labels.get(0).get(i).cost();
 	    }
 	}
-	return (int) bestcost;
+	return bestcost;
     }
 }

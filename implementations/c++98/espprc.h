@@ -174,7 +174,7 @@ public:
 	maxlen_ = maxlen;
     }
 
-    int solve(){
+    double solve(){
 	// set class variables
 	Label<T>::nresources = nresources_;
 	Label<T>::nnodes = nnodes_;
@@ -242,7 +242,7 @@ public:
                 free(labels[n][i]);
             }
         }
-	return (int) bestcost;
+	return bestcost;
     }
 };
 

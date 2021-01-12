@@ -157,8 +157,8 @@ function espprc(d::T, sol::ST;
                     for i ∈ 1:d.n ] )
     e = ESPPRC(d, nresources, resourcecapacity, maxlen)
     if index
-        solvewithindex(e)
+        Int(trunc(solvewithindex(e)))
     else
-        solve(e)
+        Int(trunc(solve(e)))
     end
 end

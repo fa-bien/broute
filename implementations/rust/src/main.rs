@@ -9,6 +9,7 @@ use rustc_version_runtime::version;
 
 mod tsp;
 mod espprc;
+mod maxflow;
 
 fn read_data(fname: &str) -> (tsp::TSPData, Vec<tsp::TSPSolution>) {
     let data = fs::read_to_string(fname).expect("Unable to read file");
@@ -21,6 +22,7 @@ fn read_data(fname: &str) -> (tsp::TSPData, Vec<tsp::TSPSolution>) {
     let mut nsols: usize = 0;
     let mut d: Vec<i32> = Vec::<i32>::new();
     let mut aux: Vec<f64> = Vec::<f64>::new();
+    let mut aux2: Vec<f64> = Vec::<f64>::new();
     let mut solutions: Vec<tsp::TSPSolution> = Vec::<tsp::TSPSolution>::new();
     let mut current_sol = tsp::TSPSolution{nodes: Vec::<usize>::new()};
     for tok in tokens {
@@ -33,6 +35,7 @@ fn read_data(fname: &str) -> (tsp::TSPData, Vec<tsp::TSPSolution>) {
             // distance matrix
             d.push(tok.parse().unwrap());
             aux.push(0.0);
+            aux2.push(0.0);
         } else if solutions.len() < nsols {
             // reading a solution
             current_sol.nodes.push(tok.parse().unwrap());
@@ -45,7 +48,8 @@ fn read_data(fname: &str) -> (tsp::TSPData, Vec<tsp::TSPSolution>) {
     }
     return (tsp::TSPData{n: n,
                          d: d.into_boxed_slice(),
-                         aux: aux.into_boxed_slice()},
+                         aux: aux.into_boxed_slice(),
+                         aux2: aux2.into_boxed_slice()},
             solutions);
 }
 
@@ -65,6 +69,8 @@ fn benchmark_one(data: &mut tsp::TSPData, solutions: &mut Vec<tsp::TSPSolution>,
             cnt = sol.lns(data, 10);
         } else if benchmarkname == "espprc-index" {
             cnt = sol.espprc(data, 6, 1);
+        } else if benchmarkname == "maxflow" {
+            cnt = sol.maxflow(data);
         } else {
             panic!("Unknown benchmark: {:?}", benchmarkname);
         }

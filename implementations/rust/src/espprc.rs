@@ -7,7 +7,7 @@ struct Label {
     at: usize,
     visited: Vec<bool>,
     ignore: Cell<bool>,
-    _predecessor: Option<usize>,
+    predecessor: Option<usize>,
     cost: f64,
     length: i32,
     q: Vec<usize>,
@@ -41,7 +41,7 @@ impl LabelCollection {
             at: 0,
             visited: visited,
             ignore: Cell::new(false),
-            _predecessor: None,
+            predecessor: None,
             cost: 0.0,
             length: 0,
             q: q,
@@ -66,7 +66,7 @@ impl LabelCollection {
         let nl = Label{at: to,
                        visited: visited,
                        ignore: Cell::new(false), 
-                       _predecessor: Some(from),
+                       predecessor: Some(from),
                        cost: cost,
                        length: length,
                        q: q,
@@ -111,7 +111,7 @@ impl LabelCollection {
 }
 
 pub fn solve(d: &tsp::TSPData,
-             nresources: usize, resourcecapacity: usize, maxlen: i32) -> i32 {
+             nresources: usize, resourcecapacity: usize, maxlen: i32) -> f64 {
     // we will store all labels here
     let mut lc = LabelCollection{ labels: Vec::new() };
     let mut q: VecDeque<usize> = VecDeque::new();
@@ -169,5 +169,6 @@ pub fn solve(d: &tsp::TSPData,
             bestcost = lc.labels[labels[0][i]].cost;
         }
     }
-    return bestcost as i32;
+    lc.labels[labels[0][0]].predecessor;
+    return bestcost;
 }

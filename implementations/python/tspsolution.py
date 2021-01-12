@@ -117,7 +117,7 @@ class TSPSolution:
             e = espprcindex.ESPPRCLC(n, d, rc,
                                      self.nodes, nresources, resourcecapacity,
                                      maxlen)
-        return e.solve()
+        return int(e.solve())
 
     # max. flow
     # arc capacity = arc cost divided by ten but only for those arcs that are
@@ -131,9 +131,9 @@ class TSPSolution:
             t[j] = d[i][j]
         for j in range(n):
             for i in range(n):
-                cap[i][j] = float(d[i][j]) if d[i][j] >= t[j] else 0
+                cap[i][j] = float(d[i][j]) if d[i][j] > t[j] else 0.0
         # then we solve it for each non-0 node as sink
-        checksum = 0
+        checksum = 0.0
         for sink in range(1, n):
             if algorithm == 'EK':
                 mf = maxflow.edmondskarp(cap, flow, n, 0, sink)

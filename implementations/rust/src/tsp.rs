@@ -1,11 +1,13 @@
 use std::cmp::min;
 
 use crate::espprc;
+use crate::maxflow;
 
 pub struct TSPData {
     pub n: usize,
     pub d: Box<[i32]>,
     pub aux: Box<[f64]>,
+    pub aux2: Box<[f64]>,
 }
 
 impl TSPData {
@@ -15,6 +17,12 @@ impl TSPData {
     
     pub fn setaux(&mut self, i: usize, j:usize, val:f64) {
         self.aux[i * self.n + j] = val;
+    }
+    
+    pub fn aux2(&self, i: usize, j:usize) -> f64 { self.aux2[i * self.n + j] }
+    
+    pub fn setaux2(&mut self, i: usize, j:usize, val:f64) {
+        self.aux2[i * self.n + j] = val;
     }
 }
 
@@ -166,6 +174,28 @@ impl TSPSolution {
             }
             maxlen += best;
         }
-        return espprc::solve(data, nresources, resourcecapacity, maxlen);
+        return espprc::solve(data, nresources, resourcecapacity, maxlen) as i32;
+    }
+
+    pub fn maxflow(&self, data: &mut TSPData) -> i32 {
+        let mut t = vec![0; data.n];
+        for ij in self.nodes.windows(2) {
+            let (i, j) = (ij[0], ij[1]);
+            t[j] = data.d(i, j);
+        }
+        // we use data.aux for capacity and data.aux2 for flow
+        for i in 0..data.n {
+            for j in 0..data.n {
+                data.setaux(i, j, if data.d(i, j) > t[j]
+                            {f64::from(data.d(i, j))} else {0.0});
+            }
+        }
+        // solve it for each non-0 node as sink
+        let mut checksum: f64 = 0.0;
+        for sink in 0..data.n {
+            let mf = maxflow::edmondskarp(data, 0, sink);
+            checksum += mf;
+        }
+        return checksum as i32;
     }
 }

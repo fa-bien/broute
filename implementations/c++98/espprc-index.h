@@ -213,7 +213,7 @@ public:
 	maxlen_ = maxlen;
     }
 
-    int solve(){
+    double solve(){
 	// set class variables
 	LabelWithIndex<T>::nresources = nresources_;
 	LabelWithIndex<T>::nnodes = nnodes_;
@@ -275,7 +275,7 @@ public:
 		bestcost = lc.cost(labels[0][i]);
 	    }
 	}
-	return (int) bestcost;
+	return bestcost;
     }
 };
 

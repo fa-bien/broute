@@ -124,5 +124,5 @@ function solve(e::ESPPRC{MT, T}) where MT <: TSPData where T <: Real
             label.ignore = true
         end
     end
-    Int(trunc(minimum(label.cost for label in labels[1])))
+    minimum(label.cost for label in labels[1])
 end

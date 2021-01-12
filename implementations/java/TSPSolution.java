@@ -164,6 +164,6 @@ public class TSPSolution {
             e = new ESPPRCLC(n, rc, d, nResources, resourceCapacity,
                              bestassignment);
         }
-        return e.solve();
+        return (int) e.solve();
     }
 }

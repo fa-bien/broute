@@ -165,10 +165,10 @@ public:
 	int maxlen = bestassignment;
         if (! index) {
             ESPPRC<T> e(n, rc, d, nresources, resourcecapacity, maxlen);
-            return e.solve();
+            return (int) e.solve();
         } else {
             ESPPRCLC<T> e(n, rc, d, nresources, resourcecapacity, maxlen);
-            return e.solve();
+            return (int) e.solve();
         }
     }
     

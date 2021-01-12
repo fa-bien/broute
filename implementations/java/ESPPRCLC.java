@@ -159,7 +159,7 @@ public class ESPPRCLC extends ESPPRC {
         super(nnodes, rc, d, nresources, rescap, maxlen);
     }
     
-    public int solve(){
+    public double solve(){
 	// set class variables
 	LabelWithIndex.nresources = nresources_;
 	LabelWithIndex.nnodes = nnodes_;
@@ -224,6 +224,6 @@ public class ESPPRCLC extends ESPPRC {
                 bestcost = lc.cost(labels.get(0).get(i));
 	    }
 	}
-	return (int) bestcost;
+	return bestcost;
     }
 }
