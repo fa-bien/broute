@@ -82,6 +82,8 @@ public class TSPBenchmark{
 		n = solutions[i].espprc(6, 2, false);
 	    } else if (benchmarkname.equals("espprc-index")) {
 		n = solutions[i].espprc(6, 1, true);
+	    } else if (benchmarkname.equals("maxflow")) {
+		n = solutions[i].maxflow();
 	    } else {
 		System.err.println("Unknown benchmark: <" + benchmarkname +">");
 		System.exit(2);

@@ -166,4 +166,30 @@ public class TSPSolution {
         }
         return (int) e.solve();
     }
+
+    public int maxflow() {
+        int n = data_.n();
+        int[] d = data_.d();
+        double[] C = data_.aux();
+        double[] F = data_.aux2();
+	double[] t = new double[n];
+	for (int k=0; k < nodes_.size() - 1; k++) {
+	    int i = nodes_.get(k);
+	    int j = nodes_.get(k+1);
+	    t[j] = (double) d[i*n+j];
+	}
+	for (int i=0; i < n; i++) {
+	    for (int j=0; j < n; j++) {
+		C[i*n+j] = d[i*n+j] > t[j] ? (double) d[i*n+j] : 0.0;
+	    }
+	}
+	// solve maxflow for each non-0 sink
+        double checksum = 0;
+        MaxFlowSolver mfs = new MaxFlowSolver(C, F, n);
+        for (int sink=1; sink < n; sink++) {
+            double mf = mfs.edmondsKarp(0, sink);
+            checksum += mf;
+        }
+        return (int) checksum;
+    }
 }
