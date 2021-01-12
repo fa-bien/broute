@@ -5,6 +5,7 @@ function TSPData(n, d) {
     this.n = n;
     this.dist = d;
     this.aux = new Array(d.length);
+    this.aux2 = new Array(d.length);
 
     this.d = function(i, j) {
 	return this.dist[i * this.n + j];
@@ -130,7 +131,7 @@ function TSPSolution(data, sequence) {
         for (var t=0; t < tour.length -1; t++) {
             var i = tour[t];
             var j = tour[t+1];
-            dual[j] = d.d(i, j);
+            dual[j] = 1.0 * d.d(i, j);
         }
         for (var i=0; i < data.n; i++) {
             for (var j=0; j < data.n; j++) {
@@ -150,11 +151,37 @@ function TSPSolution(data, sequence) {
         }
         var maxlen = bestassignment;
         if (! index) {
-            var e = new ESPPRC(n, rc, d.dist, nresources, resourcecapacity, maxlen);
+            var e =
+                new ESPPRC(n, rc, d.dist, nresources, resourcecapacity, maxlen);
         } else {
-            var e = new ESPPRCLC(n, rc, d.dist, nresources, resourcecapacity, maxlen);
+            var e = new ESPPRCLC(n, rc, d.dist,
+                                 nresources, resourcecapacity, maxlen);
         }
-        return e.solve();
+        return Math.round(e.solve());
+    }
+
+    // max flow
+    this.maxflow = function() {
+        var C = d.aux;
+        var F = d.aux2;
+        var n = d.n;
+        var t = new Array(n);
+        for (var k=0; k < tour.length - 1; k++) {
+            var i = tour[k];
+            var j = tour[k+1];
+            t[j] = d.d(i, j);
+        }
+        for (var i=0; i < data.n; i++) {
+            for (var j=0; j < data.n; j++) {
+                C[i*n+j] = d.d(i, j) > t[j] ? 1.0 * d.d(i, j) : 0.0;
+            }
+        }
+        var checksum = 0.0;
+        for (var sink=1; sink < d.n; sink++) {
+            var mf = edmondskarp(C, F, n, 0, sink);
+            checksum += mf;
+        }
+        return Math.round(checksum);
     }
 }
 
@@ -465,6 +492,65 @@ function ESPPRCLC(n, rc, d, nresources, resourcecapacity, maxlen) {
     
 }
 
+// C: capacity (flat) matrix
+// F: flow (flat) matrix
+// n: number of nodes in the graph
+// s: source
+// t: sink
+function edmondskarp(C, F, n, s, t) {
+    var totalflow = 0.0;
+    var moreflow = true;
+    var Q = new Array();
+    var pred = new Array(n);
+    for (var i=0; i < n; i++) { pred[i] = -1; }
+    for (var i=0; i < n; i++) {
+        for (var j=0; j < n; j++) {
+            F[i*n+j] = 0.0;
+        }
+    }
+    while (moreflow) {
+        // reset predecessors
+        for (var i=0; i < n; i++) {
+            pred[i] = -1;
+        }
+        Q.push(s);
+        while (Q.length > 0) {
+            var cur = Q.shift();
+            for (var j=0; j < n; j++) {
+                if (j == cur) { continue; }
+                if (pred[j] == -1 && j != s && C[cur*n+j] > F[cur*n+j]) {
+                    pred[j] = cur;
+                    Q.push(j);
+                }
+            }
+        }
+        // did we find an augmenting path?
+        if (pred[t] != -1) {
+            var df = Number.MAX_SAFE_INTEGER;
+            var j = t;
+            var i = pred[t];
+            while (i != -1) {
+                if (df > C[i*n+j] - F[i*n+j]) {
+                    df = C[i*n+j] - F[i*n+j];
+                }
+                j = i;
+                i = pred[i];
+            }
+            j = t;
+            i = pred[t];
+            while (i != -1) {
+                F[i*n+j] += df;
+                j = i;
+                i = pred[i];
+            }
+            totalflow += df;
+        } else {
+            moreflow = false;
+        }
+    }
+    return totalflow;
+}
+
 // this version requires node
 function fileAsLines(fname) {
     var fs = require('fs');
@@ -516,6 +602,8 @@ function benchmarkOne(path, benchmarkname) {
 	    n = sol.espprc(6, 2);
 	} else if (benchmarkname == 'espprc-index') {
 	    n = sol.espprc(6, 1, true);
+	} else if (benchmarkname == 'maxflow') {
+	    n = sol.maxflow();
 	} else {
 	    console.log('Unknown benchmark: ', benchmarkname);
 	}
