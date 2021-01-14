@@ -61,10 +61,19 @@ than existing libraries.
 
 \section{Languages and implementations considered}
 \subsection{C++}
+Two implementations: c++14 vs c++98.
+
 \subsection{Python}
+Python vs Pypy vs Numpy vs Numba.
+
 \subsection{Java}
+
 \subsection{Julia}
+General performance tips: read the specific doc section! One unique
+official document outlines how to write efficient code.
+
 \subsection{Rust}
+
 \subsection{JavaScript}
 JavaScript is not expected to perform as well as, say, C++. However
 there are several reasons why it can be appealing to implement routing
@@ -83,6 +92,16 @@ We use Node.js, which allows to run JavaScript programs from the
 command line. This means that there is in fact not even the need for a
 web browser. Node.js uses Google Chrome v8's JavaScript engine~\cite{nodejs}.
 
+\subsection{General cross-language considerations}
+Subjective considerations:
+\begin{itemize}
+\item Typically easier to program using Python, Julia or JavaScript.
+\item Typically harder to program using Rust than anything else but
+  might be due to lack of experience. However my experience in
+  JavaScript is much lower than in C++ and I still did everything
+  faster in JavaScript than in C++.
+\end{itemize}
+
 \section{Considered benchmarks and their format}
 \subsection{2-opt}
 \subsection{Or-opt}
@@ -91,7 +110,14 @@ web browser. Node.js uses Google Chrome v8's JavaScript engine~\cite{nodejs}.
 Note: we use a vector and not a set to store unplanned requests,
 otherwise we take the risk of losing determinism.
 
-\subsection{Something DP-like}
+\subsection{Dynamic programming for ESPPRC}
+Motivation: column generation.
+
+Mention here espprc-index and how rust does not allow multiple
+references to other labels.
+
+\subsection{Maximum flow problem}
+Motivation: branch-and-cut.
 
 \section{Considerations on how to implement a distance matrix}
 Perhaps the most straightforward way to implement a distance matrix in
@@ -123,7 +149,7 @@ There are two cases where the above considerations on using a flat
 representation do not apply: Python does not allow inlining and Julia
 has native multi-dimensional arrays. This is discussed later.
 
-\section{Language-specific notes}
+\section{Implementation-specific notes}
 \subsection{Python}
 Python does not allow to inline functions. Since using a flat matrix
 requires to wrap matrix value lookup in a function, using a flat distance
@@ -142,6 +168,12 @@ for flat representation lookup of the distance between vertices $i$
 and $j$ in matrix $d$ is \lstinline{d[i*n-n+j]}. It is worth noting
 that it involves one subtraction on top of the addition and
 multiplication used for 0-indexed languages.
+
+
+Using two threads instead of 1 improves performance by about 10\%,
+although it is unclear what the second thread is used for.
+
+
 \subsection{JavaScript}
 All benchmarks are repetitive in nature, as they successively perform similar
 operations with different input data. In JavaScript, when our
@@ -152,6 +184,7 @@ we re-start the program individually for each instance. Advanced
 knowledge of this specific JavaScript engine might allow to remove that
 performance hit, but this is clearly outside the scope of this
 study. However it is worth noting that this can be a concern in general.
+
 \subsection{Numba}
 Numba is not yet feature-complete for Numpy. A direct consequence is that some
 benchmarks cannot be implemented for Numba. For example
@@ -160,6 +193,18 @@ needed for the $LN$ benchmark. Therefore the $LNS$ benchmark cannot be
 implemented with Numba. Still, Numba is significant enough to be
 benchmarked and its current performance are an indication of what to
 expect in years to come.
+
+\subsection{Java}
+Mention inconsistencies between Java versions: code written for Java 8
+does not compile with Java 11. Because Pair is not in the API any more.
+
+\subsection{Rust}
+Issues:
+\begin{itemize}
+\item Changing from i32 to i64 is problematic somehow
+\item Not possible to have refs to both successors and predecessor in
+  Label, hence had to handle indices by hand in specific espprc implementation
+\end{itemize}
 
 \section{Other notes}
 On the ESPPRC benchmark, a label needs to store information about
@@ -173,6 +218,9 @@ here. There are two reasons for this expectation: (i) copying an array,
 represented in contiguous memory, can in general be performed faster
 than copying a set structure and (ii) lookup in an array is performed
 in $\cal{O}(1)$ time while lookup in a set is performed in $\cal{O}(log(n)$.
+
+\section*{Acknowledgements}
+Sebastian for advice and help with Rust.
 
 \bibliographystyle{plain}
 \bibliography{benchmark}
