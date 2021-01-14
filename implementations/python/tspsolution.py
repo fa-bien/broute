@@ -131,7 +131,7 @@ class TSPSolution:
             t[j] = d[i][j]
         for j in range(n):
             for i in range(n):
-                cap[i][j] = float(d[i][j]) if d[i][j] > t[j] else 0.0
+                cap[i][j] = d[i][j] / 1000 if d[i][j] > t[j] else 0.0
         # then we solve it for each non-0 node as sink
         checksum = 0.0
         for sink in range(1, n):

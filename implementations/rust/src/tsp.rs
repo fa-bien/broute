@@ -187,7 +187,7 @@ impl TSPSolution {
         for i in 0..data.n {
             for j in 0..data.n {
                 data.setaux(i, j, if data.d(i, j) > t[j]
-                            {f64::from(data.d(i, j))} else {0.0});
+                            {f64::from(data.d(i, j)) / 1000.0} else {0.0});
             }
         }
         // solve it for each non-0 node as sink

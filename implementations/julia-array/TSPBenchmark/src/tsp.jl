@@ -172,7 +172,7 @@ function maxflow(d::T, sol::ST) where T <: TSPData where ST <: TSPSolution
         t[j] = d.d[i, j]
     end
     for i ∈ 1:d.n, j ∈ 1:d.n
-        d.aux[i, j] = if (d.d[i, j] > t[j]) d.d[i,j] else zero(Float64) end
+        d.aux[i, j] = if (d.d[i, j] > t[j]) d.d[i,j]/1000 else zero(Float64) end
     end
     checksum = zero(Float64);
     for sink in 2:d.n

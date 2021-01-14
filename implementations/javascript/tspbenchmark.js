@@ -173,7 +173,7 @@ function TSPSolution(data, sequence) {
         }
         for (var i=0; i < data.n; i++) {
             for (var j=0; j < data.n; j++) {
-                C[i*n+j] = d.d(i, j) > t[j] ? 1.0 * d.d(i, j) : 0.0;
+                C[i*n+j] = d.d(i, j) > t[j] ? d.d(i, j) / 1000.0 : 0.0;
             }
         }
         var checksum = 0.0;
@@ -181,7 +181,7 @@ function TSPSolution(data, sequence) {
             var mf = edmondskarp(C, F, n, 0, sink);
             checksum += mf;
         }
-        return Math.round(checksum);
+        return Math.trunc(checksum);
     }
 }
 

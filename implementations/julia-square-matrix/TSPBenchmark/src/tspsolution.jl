@@ -137,7 +137,8 @@ function maxflow(d::T, sol::ST) where T <: TSPData where ST <: TSPSolution
     end
     for i ∈ 1:d.n, j ∈ 1:d.n
         setaux!(d, i, j,
-                if (dist(d, i, j) > t[j]) dist(d, i, j) else zero(Float64) end)
+                if (dist(d, i, j) > t[j]) dist(d, i, j) / 1000 else
+                zero(Float64) end)
     end
     checksum = zero(Float64)
     for sink in 2:d.n

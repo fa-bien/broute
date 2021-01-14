@@ -180,7 +180,7 @@ public class TSPSolution {
 	}
 	for (int i=0; i < n; i++) {
 	    for (int j=0; j < n; j++) {
-		C[i*n+j] = d[i*n+j] > t[j] ? (double) d[i*n+j] : 0.0;
+		C[i*n+j] = d[i*n+j] > t[j] ? d[i*n+j] / 1000.0 : 0.0;
 	    }
 	}
 	// solve maxflow for each non-0 sink
