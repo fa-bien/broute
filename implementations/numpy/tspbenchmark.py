@@ -42,6 +42,8 @@ def benchmarkone(solutions, benchmarkname):
         bench = lambda x: x.espprc(6, 1)
     elif benchmarkname == 'espprc-2':
         bench = lambda x: x.espprc(6, 2)
+    elif benchmarkname == 'espprc-index':
+        bench = lambda x: x.espprc(6, 1, True)
     else:
         bench = lambda x: None
     #
