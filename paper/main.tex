@@ -190,13 +190,23 @@ Numba is not yet feature-complete for Numpy. A direct consequence is that some
 benchmarks cannot be implemented for Numba. For example
 \lstinline{numpy.insert()} is not implemented, but this function is
 needed for the $LN$ benchmark. Therefore the $LNS$ benchmark cannot be
-implemented with Numba. Still, Numba is significant enough to be
-benchmarked and its current performance are an indication of what to
-expect in years to come.
+implemented with Numba. Additionally, we were not able to implement
+the ESPPRC benchmark in a satisfying manner. In our experience, Numba
+error messages are sometimes unrelated to the issue causing them, or
+too obscure to make sense, keeping in mind the premises of this
+paper. It would certainly be possible to implement a dynamic
+programming algorithm for the ESPPRC benchmark using Numba's JIT
+compilationfeatures, however our conclusion is that it would not be
+possible to do so without expert knowledge of Numba.
+
+Still, Numba is significant enough to be
+benchmarked and its current performances are an indication of what to
+expect in years to come, as the project matures.
 
 \subsection{Java}
 Mention inconsistencies between Java versions: code written for Java 8
-does not compile with Java 11. Because Pair is not in the API any more.
+does not compile with Java 11. Because Pair is not in the API any
+more.
 
 \subsection{Rust}
 Issues:
