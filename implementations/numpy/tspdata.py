@@ -19,6 +19,7 @@ class TSPData:
         # place to have it.
         # dummy values to begin with...
         self.aux = numpy.array([ [ float(x) for x in row ] for row in d ])
+        self.aux2 = numpy.array([ [ float(x) for x in row ] for row in d ])
         
     def matrixstring(self):
         rows = [ ' '.join(str(x) for x in row) for row in self.d ]

@@ -44,8 +44,11 @@ def benchmarkone(solutions, benchmarkname):
         bench = lambda x: x.espprc(6, 2)
     elif benchmarkname == 'espprc-index':
         bench = lambda x: x.espprc(6, 1, True)
+    elif benchmarkname == 'maxflow':
+        bench = lambda x: x.maxflow()
     else:
-        bench = lambda x: None
+        sys.stderr.write('Invalid benchmark: ' + benchmarkname + '\n')
+        sys.exit(22)
     #
     nimpr = 0
     totalcputime = 0.0
