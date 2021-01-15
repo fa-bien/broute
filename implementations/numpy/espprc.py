@@ -19,7 +19,7 @@ class Label:
         # resource consumption
         self.q = np.array([0 for x in self.resources])
         # successors for later recursive deletion when dominated
-        self.successors = []
+        self.successors = np.array([])
 
     # Returns True if self dominates other
     # pre-condition: self.at == other.at

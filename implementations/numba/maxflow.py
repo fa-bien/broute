@@ -1,7 +1,7 @@
 import sys
-import collections
 
 import numpy as np
+from numba import jit
 
 Inf = 100000
 
@@ -10,10 +10,11 @@ Inf = 100000
 # n is the number of nodes in the complete graph
 # s is the source
 # t is the sink
+@jit(nopython=True)
 def edmondskarp(cap, flow, n, s, t):
     totalflow = 0.0
     moreflow = True
-    Q = collections.deque()
+    Q = []
     pred = np.array([ -1 for i in range(n) ])
     for i in range(n):
         for j in range(n):
@@ -24,7 +25,7 @@ def edmondskarp(cap, flow, n, s, t):
             pred[i] = -1
         Q.append(s)
         while len(Q) > 0:
-            cur = Q.popleft()
+            cur = Q.pop(0)
             for j in range(n):
                 if j == cur:
                     continue

@@ -34,12 +34,17 @@ def loadfromfile(fname):
 def benchmarkone(solutions, benchmarkname):
     if benchmarkname == '2-opt':
         bench = lambda x: x.two_opt()
-    elif benchmarkname == 'lns':
-        bench = lambda x: x.lns()
+    # elif benchmarkname == 'lns':
+    #     bench = lambda x: x.lns()
     elif benchmarkname == 'Or-opt':
         bench = lambda x: x.or_opt()
+    # elif benchmarkname == 'espprc-index':
+    #     bench = lambda x: x.espprc_index(nresources=6, resourcecapacity=1)
+    elif benchmarkname == 'maxflow':
+        bench = lambda x: x.maxflow()
     else:
-        bench = lambda x: None
+        sys.stderr.write('Invalid benchmark: ' + benchmarkname + '\n')
+        sys.exit(22)
     #
     nimpr = 0
     totalcputime = 0.0
