@@ -27,6 +27,7 @@ protected:
     T **dh_;
     // auxiliary graph for e.g. espprc
     double *aux_;
+    double *aux2_;
 
 public:
     TSPData(int n, T *d) {
@@ -35,6 +36,8 @@ public:
 	dh_ = new T*[n];
 	for (int i=0; i < n; i++)
 	    dh_[i] = d_ + n * i;
+        aux_ = new double[n*n];
+        aux2_ = new double[n*n];
     }
     // ~TSPData() { delete[] d_; }
     // load data from file
@@ -47,6 +50,7 @@ public:
     // used to store data for auxiliary graphs, typically needs to be
     // allocated once then overwritten many times
     double *aux() { return aux_; }
+    double *aux2() { return aux2_; }
 };
 
 #endif
