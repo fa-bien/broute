@@ -1,1 +1,1 @@
-../c++/compile.sh
+../c++/build.sh

@@ -1,1 +1,1 @@
-../java/compile.sh
+../java/build.sh

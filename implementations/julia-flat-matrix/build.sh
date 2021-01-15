@@ -1,1 +1,1 @@
-../julia-square-matrix/compile.sh
+../julia-square-matrix/build.sh
