@@ -24,7 +24,7 @@ for benchmark in "${!benchmarks[@]}"; do
     for lang in ${benchmarks[$benchmark]}; do
 	(echo -e "Running \e[1m$lang\e[0m implementation of \e[1m$benchmark\e[0m benchmark"
 	 (pushd $impldir'/'$lang > /dev/null
-	  # [[ -f compile.sh ]] && ./compile.sh
+	  # [[ -f build.sh ]] && ./build.sh
 	  echo "language,version,benchmark,instance,n,nsolutions,checksum,time"
 	  ./run_benchmark.sh $instdir $benchmark
 	  popd > /dev/null
