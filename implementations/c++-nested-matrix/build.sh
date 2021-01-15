@@ -1,1 +1,1 @@
-../c++/build.sh
+../c++14/build.sh
