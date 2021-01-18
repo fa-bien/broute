@@ -8,7 +8,7 @@ impldir=`pwd`'/implementations'
 # Number of threads = environment variable THREADS or default value
 [[ -z "$THREADS" ]] && THREADS=3
 
-langs="c++ c++98 c++-hybrid-matrix c++-nested-matrix c++-static-arrays java java-nested-matrix javascript javascript-nested-matrix java-static-arrays julia-array julia-flat-matrix julia-square-matrix numba numba-flat-matrix numpy numpy-flat-matrix pypy pypy-nested-matrix python python-flat-matrix python-nested-matrix-function rust"
+langs="c++14 c++98 c++14-hybrid-matrix c++14-nested-matrix c++14-static-arrays java java-nested-matrix javascript javascript-nested-matrix java-static-arrays julia-array julia-flat-matrix julia-square-matrix numba numba-flat-matrix numpy numpy-flat-matrix pypy pypy-nested-matrix python python-flat-matrix python-nested-matrix-function rust"
 
 echo "Building stuff"
 for lang in $langs; do
