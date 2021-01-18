@@ -11,10 +11,10 @@ instdir=`pwd`'/instances'
 [[ -z "$THREADS" ]] && THREADS=3
 
 all_langs="c++14 c++98 c++-hybrid-matrix c++-nested-matrix c++-static-arrays java java-nested-matrix javascript javascript-nested-matrix java-static-arrays julia-array julia-flat-matrix julia-square-matrix numba numba-flat-matrix numpy numpy-flat-matrix pypy pypy-nested-matrix python python-flat-matrix python-nested-matrix-function rust"
-lns_langs="c++14 c++98 java javascript julia_array julia-flat-matrix julia-square-matrix pypy python rust"
-espprc_langs="c++14 c++98 java javascript julia_array julia-flat-matrix julia-square-matrix pypy python"
-espprcindex_langs="c++14 c++98 java javascript julia_array julia-flat-matrix julia-square-matrix pypy python rust"
-maxflow_langs="c++14 c++98 java javascript julia_array julia-flat-matrix julia-square-matrix pypy python rust"
+lns_langs="c++14 c++98 java javascript julia-array julia-flat-matrix julia-square-matrix pypy python rust"
+espprc_langs="c++14 c++98 java javascript julia-array julia-flat-matrix julia-square-matrix pypy python"
+espprcindex_langs="c++14 c++98 java javascript julia-array julia-flat-matrix julia-square-matrix pypy python rust"
+maxflow_langs="c++14 c++98 java javascript julia-array julia-flat-matrix julia-square-matrix pypy python rust"
 declare -A benchmarks=( ["2-opt"]=$all_langs
 			["Or-opt"]=$all_langs
 			["lns"]=$lns_langs
