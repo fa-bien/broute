@@ -37,6 +37,10 @@ Fabien Tricoire$^{1}$ \\[1ex]
 
 \section{Introduction}
 \label{sec:intro}
+
+Some languages are easier, but how much performance do we lose by
+using them?
+
 Purposes: determine which language we can tell our students to
 use to implement routing optimisation routines. Also determine which
 language we can use ourselves.
@@ -47,30 +51,158 @@ can expect from an average student. Similar algorithm in various languages.
 
 What we measure: run time of the algorithm only. Everything else
 (reading data, building initial solution) is not measured. Currently
-Julia also measures compilation time, needs to be fixed.
+Julia, Javascript, Pypy, Numba also measure compilation time.
 
-We restrict ourselves to variable-size vectors, since they are
-necessary in most algorithms for vehicle routing, for instance to
-insert or delete a vertex from a tour. This is the reason why we do
-not provide a C implementation. It is of course possible to
-implement variable-size vectors using fixed-size arrays and
-bookkeeping; however this stands directly against our stated purposes
-and philosophy. Moreover, implementing a bug-free, efficient version
-of variable-size vectors is unlikely to result in something better
-than existing libraries.
+In order to represent a tour in heuristics we restrict ourselves to
+variable-size vectors, since they are necessary in most algorithms for
+vehicle routing, for instance to insert or delete a vertex from a
+tour.
+% This is the reason why we do
+% not provide a C implementation. It is of course possible to
+% implement variable-size vectors using fixed-size arrays and
+% bookkeeping; however this stands directly against our stated purposes
+% and philosophy. Moreover, implementing a bug-free, efficient version
+% of variable-size vectors is unlikely to result in something better
+% than existing libraries.
+Inserting and deleting elements in a vector has linear worst-case time
+complexity. However, for heuristics it is still usually a good idea to
+use vectors rather than, say, linked lists, since neighborhood
+exploration typically requires to evaluate many moves then perform
+only one of these moves. The complexity of performing a move is thus
+secondary and unlikely to be a performance bottleneck. Additionally,
+performing certain moves can actually be more efficient using a
+vector than using a linked list, e.g. inverting a subsequence.
+
+\subsection{Limitations}
+Benchmarks are by definition limited in scope; any given benchmark
+measurement is only valid within a certain environment. In our case
+such environmental factors include the choice of compilers, compiler
+versions, operating system and CPU family. Therefore all results are
+to be taken as indicators but not absolute truths. The intent of this
+study is not to declare a language the winner because it is
+consistently faster than others by a few percents, but rather to
+assess what kind of performance losses can be expected by, for
+example, using Python instead of C++. OR to assess what kind of
+performance gains can be achieved by using a JIT compiler for Python.
+
+\section{The benchmarks}
+We consider five different benchmark algorithms that perform tasks
+commonly encountered in transport optimization. Together they capture
+key aspects of computationally intensive tasks in heuristics and
+exact methods for transport optimization. Additionally, we believe
+that they also capture such aspects for other fields of application
+of operations research, such as e.g. scheduling. For the sake of
+simplicity, we consider the symmetric travelling salesperson problem
+(TSP) as a base problem, i.e. input data are in the form of a
+symmetric distance matrix while a solution is a permutation. However
+some benchmark algorithms solve different problems than the TSP based on these
+TSP data, as described below.
+
+All five benchmarking algorithms described below are deterministic.
+Additionally, the input provided to them is also deterministic,
+i.e. each implementation receives the exact same inputs and performs
+the same operations from these inputs. For that purpose, we generate
+various instance files, each with a given size $n$, which represents
+the number of vertices in the graph, and a number $p$ of
+permutations. A permutation is a solution to the TSP. Each instance
+file contains one $n \times n$ distance matrix as well as $p$ randomly
+generated permutations, which are used as starting \emph{seeds} for
+the algorithms (e.g. as starting solution for 2-opt). Since the same
+instance files are given to 
+each implementation, all implementations perform the same operations
+and return the same result. In order to control result integrity we use a
+mechanism similar to \emph{checksum}. The checksum calculation for
+applying a certain algorithm using a given permutation as starting seed differs
+based on the algorithm and is explained separately for each algorithm
+below. The checksum calculation for an instance file is the sum of
+checksum values over all permutations in that instance file.
+
+Performances are measured per instance file, i.e. each time reported
+is for running an algorithm $p$ times, using one distance matrix with the $p$
+different seed permutations.
+
+\subsection{2-opt}
+One of the most commonly used heuristics in vehicle routing, 2-opt
+improves a tour by performing 2-exchanges. A 2-exchange consists in
+removing two edges from a tour and reconnecting the tour with two
+other edges. It is equivalent to inverting a sub-sequence of the
+tour, and can be performed in place using an array or vector solution
+representation.
+
+The checksum for a given permutation seed is calculated as the number of
+improvements found while applying first-improvement 2-opt, using this
+permutation as starting solution.
+
+\subsection{Or-opt}
+
+
+The checksum for a given permutation seed is calculated as the number of
+improvements found while applying first-improvement Or-opt, using this
+permutation as starting solution.
+
+\subsection{Large neighbourhood search}
+
+Note: we use a vector and not a set to store unplanned requests,
+otherwise we take the risk of losing determinism.
+
+The checksum for a given permutation seed is calculated as the total
+cost of insertions performed while applying 10 iterations of LNS using
+that permutation as starting solution.
+
+
+\subsection{Dynamic programming for ESPPRC}
+Motivation: column generation.
+
+Mention here espprc-index and how rust does not allow multiple
+references to other labels.
+
+The checksum for a given permutation seed is the cost of the shortest
+elementary path obtained when using that permutation seed to generate the
+ESPPRC instance, truncated to its integer part.
+
+\subsection{Maximum flow problem}
+Motivation: branch-and-cut.
+
+The checksum for a given permutation seed is the maximum flow value
+obtained when using that permutation seed to generate the MFP
+instance, truncated to its integer part. 
 
 \section{Languages and implementations considered}
+We consider six different programming languages: C++, Python, Java,
+Julia, Rust and Javascript. Any rule of selection
+is arbitrary in nature; however, we indicate below, for each of these
+languages, the main reasons behind their selection. It is possible to
+add other languages to this list in the future.
+
+For each language, we may consider multiple \emph{implementations},
+which differ by which mechanisms or library they use. For
+instance with Python we can compare an implementation using native
+lists against an implementation using Numpy arrays. Implementations are
+detailed individually below for each language. The code for all
+implementations can be found at
+\url{https://github.com/fa-bien/routing-benchmark}.
+
 \subsection{C++}
 Two implementations: c++14 vs c++98.
 
+Flat vs nested matrix.
+
+static arrays too.
+
 \subsection{Python}
 Python vs Pypy vs Numpy vs Numba.
+Flat vs nested matrix.
 
 \subsection{Java}
+Flat vs nested matrix.
+static arrays too.
 
 \subsection{Julia}
 General performance tips: read the specific doc section! One unique
-official document outlines how to write efficient code.
+official document outlines how to write efficient code. there is also
+an automated tool for that.
+
+Flat vs nested matrix.
 
 \subsection{Rust}
 
@@ -81,7 +213,7 @@ algorithms in JavaScript:
 \begin{itemize}
 \item Any program written in JavaScript can run on virtually any
   computer with a modern web browser, including smartphones.
-\item Integrating JavaScript in a web interface is especially easy.
+\item Integrating JavaScript with a web interface is especially easy.
 \item JavaScript engines have received considerable attention from
   major companies and are the subject of fierce competition on
   performance. As a result they have seen vast performance
@@ -90,36 +222,12 @@ algorithms in JavaScript:
 
 We use Node.js, which allows to run JavaScript programs from the
 command line. This means that there is in fact not even the need for a
-web browser. Node.js uses Google Chrome v8's JavaScript engine~\cite{nodejs}.
+web browser. Node.js currently uses Google Chrome v8's JavaScript
+engine~\cite{nodejs}.
 
-\subsection{General cross-language considerations}
-Subjective considerations:
-\begin{itemize}
-\item Typically easier to program using Python, Julia or JavaScript.
-\item Typically harder to program using Rust than anything else but
-  might be due to lack of experience. However my experience in
-  JavaScript is much lower than in C++ and I still did everything
-  faster in JavaScript than in C++.
-\end{itemize}
+Flat vs nested.
 
-\section{Considered benchmarks and their format}
-\subsection{2-opt}
-\subsection{Or-opt}
-\subsection{Large neighbourhood search}
-
-Note: we use a vector and not a set to store unplanned requests,
-otherwise we take the risk of losing determinism.
-
-\subsection{Dynamic programming for ESPPRC}
-Motivation: column generation.
-
-Mention here espprc-index and how rust does not allow multiple
-references to other labels.
-
-\subsection{Maximum flow problem}
-Motivation: branch-and-cut.
-
-\section{Considerations on how to implement a distance matrix}
+\subsection{Considerations on how to implement a distance matrix}
 Perhaps the most straightforward way to implement a distance matrix in
 a number of languages is to use nested arrays, i.e. each element of the
 main array is an array representing a row of the distance matrix. This
@@ -143,11 +251,27 @@ lookup, and that lookups have to be wrapped in a function call for the
 sake of readability. Such function calls can usually be inlined,
 i.e. the function content is substituted to the function call, so
 there should be no runtime penalty from using a function call. In
-general we expect a speedup from using a flat representation.
+general we expect a speedup from using a flat representation. We
+implemented some of the benchmarks with both flat and nested matrix
+representation in order to determine if there are significant
+performance differences.
 
-There are two cases where the above considerations on using a flat
-representation do not apply: Python does not allow inlining and Julia
-has native multi-dimensional arrays. This is discussed later.
+There are a few cases where the above considerations on using a flat
+representation do not apply: Python does not allow inlining, while
+Numpy and Julia provide multi-dimensional arrays. Nonetheless we also
+wrote a flat matrix version of these implementations, in order
+to elicit any difference in performance. 
+
+\subsection{Other general cross-language considerations}
+Subjective considerations:
+\begin{itemize}
+\item Typically easier to program using Python, Julia or JavaScript.
+\item Typically harder to program using Rust than anything else but
+  might be due to lack of experience. However my experience in
+  JavaScript is much lower than in C++ and I still did everything
+  faster in JavaScript than in C++.
+\end{itemize}
+
 
 \section{Implementation-specific notes}
 \subsection{Python}
@@ -160,6 +284,20 @@ purposes and philosophy stated in Section~\ref{sec:intro}.
 Running Python code that uses a flat representation with a JIT compiler
 (e.g. Pypy, Numba) introduces automatic inlining and is likely to
 remedy this.
+
+On the ESPPRC benchmark, a label needs to store information about
+which customers have already been visited in the partial path it
+represents. In Python, preliminary testing reveals that using a set of
+integers for that purpose is twice as fast as using a vector of
+booleans. Similar preliminary testing in C++ reveals the opposite:
+using an array of booleans is faster. This is the behaviour we would
+expect in general, the observation on Python are the surprising ones
+here. There are two reasons for this expectation: (i) copying an array,
+represented in contiguous memory, can in general be performed faster
+than copying a set structure and (ii) lookup in an array is performed
+in $\mathcal{O}(1)$ while lookup in a set is performed in
+$\mathcal{O}(log(n))$.
+
 \subsection{Julia}
 Julia has native multi-dimensional arrays, which may be more efficient
 than a flat representation. We will determine which version to use
@@ -216,21 +354,30 @@ Issues:
   Label, hence had to handle indices by hand in specific espprc implementation
 \end{itemize}
 
-\section{Other notes}
-On the ESPPRC benchmark, a label needs to store information about
-which customers have already been visited in the partial path it
-represents. In Python, preliminary testing reveals that using a set of
-integers for that purpose is twice as fast as using a vector of
-booleans. Similar preliminary testing in C++ reveals the opposite:
-using an array of booleans is faster. This is the behaviour we would
-expect in general, the observation on Python are the surprising ones
-here. There are two reasons for this expectation: (i) copying an array,
-represented in contiguous memory, can in general be performed faster
-than copying a set structure and (ii) lookup in an array is performed
-in $\cal{O}(1)$ time while lookup in a set is performed in $\cal{O}(log(n)$.
+\section{Experiments}
+All programs are run concurrently on an AMD Ryzen 5 3600 6-Core
+Processor at 3.6 GHz with 16 GB RAM running Linux. Twelve threads can
+run in parallel, however in our setting at most 5 threads are used at
+any given time.
+
+Mention here compilers and compiler versions used.
+
+\subsection{Impact of using a flat matrix}
+\subsection{Impact of using static arrays}
+\subsection{A comparison of Python implementations}
+\subsection{A comparison of C++ implementations}
+Also add a clang++ vs g++ comparison?
+\subsection{General cross-language comparison}
+\subsection{Cross-language comparison: fast languages}
+
+\section{Discussion}
+The question of what programming language to use when implementing
+optimization algorithms is one that, by essence, does not have a final
+answer.
 
 \section*{Acknowledgements}
-Sebastian for advice and help with Rust.
+The author is grateful to Sebastian Leitner for his valuable support
+in relation with the Rust implementation.
 
 \bibliographystyle{plain}
 \bibliography{benchmark}
