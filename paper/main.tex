@@ -122,33 +122,58 @@ is for running an algorithm $p$ times, using one distance matrix with the $p$
 different seed permutations.
 
 \subsection{2-opt}
+The 2-opt heuristic was first described by~\cite{2-opt}.
 One of the most commonly used heuristics in vehicle routing, 2-opt
 improves a tour by performing 2-exchanges. A 2-exchange consists in
 removing two edges from a tour and reconnecting the tour with two
 other edges. It is equivalent to inverting a sub-sequence of the
 tour, and can be performed in place using an array or vector solution
-representation.
+representation. If the distances are symmetric, then each move can be
+evaluated in constant time. 
 
 The checksum for a given permutation seed is calculated as the number of
-improvements found while applying first-improvement 2-opt, using this
-permutation as starting solution.
+improvements found while applying first-improvement 2-opt until no
+improving move exists, using this permutation as starting solution.
 
 \subsection{Or-opt}
-
+Or-opt is a heuristic that was first introduced by~\cite(Or-opt}.
+It relies on the exploration of a neighborhood that is a subset of all
+3-exchanges. A 3-exchange consists in removing 3 edges from a tour and
+reconnecting the tour in a different way. Of all these moves, Or-opt
+only considers those that shift a sequence of 1, 2 or 3 vertices to a
+different position in the tour. Each move can be evaluated in constant time. 
 
 The checksum for a given permutation seed is calculated as the number of
-improvements found while applying first-improvement Or-opt, using this
-permutation as starting solution.
+improvements found while applying first-improvement Or-opt until no
+improving move exists, using this permutation as starting solution.
 
 \subsection{Large neighbourhood search}
+Large neighborhood search (LNS) was originally introduced in
+conjunction with constraint programming to solve the vehicle routing
+problem with time windows (VRPTW)~\cite{lns}. Since it has been
+a very popular method for tackling a wide variety of vehicle routing
+problems, see e.g.~\cite{lnschapter}.
 
-Note: we use a vector and not a set to store unplanned requests,
-otherwise we take the risk of losing determinism.
+LNS iteratively (i) copies the \emph{incumbent} solution, (ii)
+destroys the copy by removing some vertices from it, (iii) repairs the
+partial solution by re-inserting previously removed customers in it
+and (iv) determines whether this newly produced solution becomes the
+new incumbent solution or not. The whole method relies, among other
+things, on randomness. This is an issue since we want each benchmark
+to be deterministic. To remedy this issue, we design deterministic
+schemes for both destroying and repairing stages. For each starting
+seed, we apply a certain number of LNS iterations. At each iteration,
+the vertices at even indices in the tour are removed. These removed
+vertices are stored in a vector in the order in which they were
+removed, i.e. from smallest to largest index. Then the cost of each
+possible insertion is calculated and the cheapest insertion is
+performed. Because removed vertices are stored in a vector, the
+algorithm's behaviour in case of same-cost insertions is
+deterministic. 
 
 The checksum for a given permutation seed is calculated as the total
 cost of insertions performed while applying 10 iterations of LNS using
 that permutation as starting solution.
-
 
 \subsection{Dynamic programming for ESPPRC}
 Motivation: column generation.
