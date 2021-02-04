@@ -12,6 +12,7 @@
 \usepackage{graphicx,color}
 \usepackage[utf8]{inputenc}
 \usepackage{listings} % for inline code
+\usepackage{verbatim}
 
 \allowdisplaybreaks
 \geometry{a4paper,left=1in,right=1in,top=1in,bottom=1in}
@@ -104,10 +105,19 @@ i.e. each implementation receives the exact same inputs and performs
 the same operations from these inputs. For that purpose, we generate
 various instance files, each with a given size $n$, which represents
 the number of vertices in the graph, and a number $p$ of
-permutations. A permutation is a solution to the TSP. Each instance
+permutations. A permutation is a solution to the TSP.
+Vertex coordinates are generated randomly in $[0, 100)$. Let $d_{ij}$
+be the Euclidean distance between $i$ and $j$, then the distance
+considered is $c_{ij} = \lfloor 100 d_{ij} \rfloor$. Since it is an
+integer number, it is sufficient to use integer number representation
+to compute the cost of a TSP solution; however certain benchmarks use
+floating-point number representation, as explained below.
+Each instance
 file contains one $n \times n$ distance matrix as well as $p$ randomly
 generated permutations, which are used as starting \emph{seeds} for
-the algorithms (e.g. as starting solution for 2-opt). Since the same
+the algorithms (e.g. as starting solution for 2-opt).
+
+Since the same
 instance files are given to 
 each implementation, all implementations perform the same operations
 and return the same result. In order to control result integrity we use a
@@ -136,7 +146,7 @@ improvements found while applying first-improvement 2-opt until no
 improving move exists, using this permutation as starting solution.
 
 \subsection{Or-opt}
-Or-opt is a heuristic that was first introduced by~\cite(Or-opt}.
+Or-opt is a heuristic that was first introduced by~\cite{Or-opt}.
 It relies on the exploration of a neighborhood that is a subset of all
 3-exchanges. A 3-exchange consists in removing 3 edges from a tour and
 reconnecting the tour in a different way. Of all these moves, Or-opt
@@ -147,7 +157,7 @@ The checksum for a given permutation seed is calculated as the number of
 improvements found while applying first-improvement Or-opt until no
 improving move exists, using this permutation as starting solution.
 
-\subsection{Large neighbourhood search}
+\subsection{LNS: Large neighbourhood search}
 Large neighborhood search (LNS) was originally introduced in
 conjunction with constraint programming to solve the vehicle routing
 problem with time windows (VRPTW)~\cite{lns}. Since it has been
@@ -158,7 +168,7 @@ LNS iteratively (i) copies the \emph{incumbent} solution, (ii)
 destroys the copy by removing some vertices from it, (iii) repairs the
 partial solution by re-inserting previously removed customers in it
 and (iv) determines whether this newly produced solution becomes the
-new incumbent solution or not. The whole method relies, among other
+new incumbent solution or not. The method relies, among other
 things, on randomness. This is an issue since we want each benchmark
 to be deterministic. To remedy this issue, we design deterministic
 schemes for both destroying and repairing stages. For each starting
@@ -175,18 +185,69 @@ The checksum for a given permutation seed is calculated as the total
 cost of insertions performed while applying 10 iterations of LNS using
 that permutation as starting solution.
 
-\subsection{Dynamic programming for ESPPRC}
-Motivation: column generation.
+\subsection{ESPPRC: Dynamic programming for column generation}
+Many state-of-the-art exact methods for vehicle routing problems rely
+on column generation (see e.g.~\cite{Baldacci:2012survey}). In such
+methods, a significant amount of CPU effort is spent solving the
+\emph{pricing subproblem}, which differs depending on the problem at
+hand but is nonetheless often an elementary shortest path problem with
+resource constraints (ESPPRC). While it can be solved heuristically,
+in order to establish optimality it eventually needs to be solved
+exactly as well. For this benchmark we implement a dynamic
+programming algorithm similar to the one by~\cite{feillet:2004exact}
+to solve the ESPPRC, albeit without time windows. One difficulty in
+this problem stems from the existence of negative-cost cycles in the
+graph. 
 
-Mention here espprc-index and how rust does not allow multiple
-references to other labels.
+In order to simulate an environment similar to the one encountered in
+column generation for VRPs, we derive an ESPPRC instance from each TSP
+solution by using an auxilliary distance matrix $c'$ from the
+existing distance matrix $c$, as follows:
+\begin{enumerate}
+\item For each vertex $j$, let $\pi_j$ be the cost of arc $(i, j)$,
+  where $i$ is the predecessor of $j$ in the TSP solution.
+\item For each arc $(i, j)$, set $c'_{ij}$ to $c_{ij} - d_j$.
+\end{enumerate}
+Additionally, we generate resource consumption as follows: we consider
+6 resources numbered from 0 to 5, and any vertex $i$ consumes resource
+$r$ iff the $r^{th}$ bit of $i$'s binary representation is 1
+(considering that the first bit is bit 0). That is, in C syntax, iff
+$i & (1 << r) > 0$. Capacity is set to 1 for each resource.
+The algorithm then computes the elementary shortest path with resource
+constraints on $c'$ from 0 to 0 (1 to 1 in Julia).
+
+For this benchmark, floating-point numbers are used to represent cost,
+even though the values are integer. This is to emulate the usual
+setting when solving such problems.
+
+Each label needs (i) a reference to its predecessor, so that
+paths can be reconstructed and (ii) a collection of references to
+its successors, in order to recursively propagate dominance and later
+ignore labels that are successors of an already proved-to-be-dominated
+label. Rust does not allow that, at least not in the intuitive way
+where a label is encapsulated in a \verb|struct|, including references
+to predecessor and successors. This is because Rust is focused on
+security, while this type of construct can lead to unsafe operations if
+not used properly. This means that this benchmark cannot be
+implemented with Rust, even though it is consistent and reliable with all
+other implementations. In order to remediate this issue, we also
+implement a second benchmark to implement the same algorithm, although
+in a less intuitive way: all labels are stored in a collection, and
+the indices in this collection are used in other collections to store all
+predecessors and successors. This second implementation is more
+tedious, but it may also be more efficient, so we also implement it in
+other languages. We call it \emph{espprc-index}.
 
 The checksum for a given permutation seed is the cost of the shortest
 elementary path obtained when using that permutation seed to generate the
 ESPPRC instance, truncated to its integer part.
 
-\subsection{Maximum flow problem}
-Motivation: branch-and-cut.
+\subsection{Maxflow: Maximum flow problem}
+Another very popular framework for the exact solution of routing
+problems is branch and cut. \cite{padberg:532}
+
+Similar to the ESPPRC benchmark above and for the same reason, we use
+floating-point number representation for this benchmark.
 
 The checksum for a given permutation seed is the maximum flow value
 obtained when using that permutation seed to generate the MFP
