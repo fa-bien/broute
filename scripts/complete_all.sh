@@ -35,6 +35,13 @@ for benchmark in "${!benchmarks[@]}"; do
         # add to list of running benchmarks
         existing=`cat $runningtmpfile`
         key="$benchmark|$lang"
+        # skipping part is here
+        csvfname=$benchmark'-'$lang'-runs.csv'
+        if [[ -e $csvfname ]]; then
+            echo "Skipping: $key"
+            continue
+        fi
+        #
         echo "$existing $key" > $runningtmpfile
          # add to list of currently running jobs
 	(echo -e "Running \e[1m$lang\e[0m implementation of \e[1m$benchmark\e[0m benchmark"
@@ -43,7 +50,7 @@ for benchmark in "${!benchmarks[@]}"; do
 	  echo "language,version,benchmark,instance,n,nsolutions,checksum,time"
 	  ./run_benchmark.sh $instdir $benchmark
 	  popd > /dev/null
-	 ) > $benchmark-$lang-runs.csv
+	 ) > $csvfname
          # remove from list of currently running jobs
          existing=`cat $runningtmpfile`
          echo "${existing/ $key/}" > $runningtmpfile
