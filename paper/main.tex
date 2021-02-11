@@ -187,6 +187,7 @@ cost of insertions performed while applying 10 iterations of LNS using
 that permutation as starting solution.
 
 \subsection{Dynamic programming for column generation}
+\label{sec:espprc}
 Many state-of-the-art exact methods for vehicle routing problems rely
 on column generation (see e.g.~\cite{Baldacci:2012survey}). In such
 methods, a significant amount of CPU effort is spent solving the
@@ -213,7 +214,7 @@ Additionally, we generate resource consumption as follows: we consider
 6 resources numbered from 0 to 5, and any vertex $i$ consumes resource
 $r$ iff the $r^{th}$ bit of $i$'s binary representation is 1
 (considering that the first bit is bit 0). That is, in C syntax, iff
-$i & (1 << r) > 0$. Capacity is set to 1 for each resource.
+\verb|i & (1 << r) > 0|. Capacity is set to 1 for each resource.
 The algorithm then computes the elementary shortest path with resource
 constraints on $c'$ from 0 to 0 (1 to 1 in Julia).
 
@@ -379,15 +380,54 @@ wrote a flat matrix version of these implementations, in order
 to elicit any difference in performance. 
 
 \subsection{Other general cross-language considerations}
-Subjective considerations:
+Here we discuss considerations that are subjective in nature, as they
+relate to our experience implementing all benchmarks in all
+languages. We need to take into account our experience using various
+languages prior to the beginning of this work:
 \begin{itemize}
-\item Typically easier to program using Python, Julia or JavaScript.
-\item Typically harder to program using Rust than anything else but
-  might be due to lack of experience. However my experience in
-  JavaScript is much lower than in C++ and I still did everything
-  faster in JavaScript than in C++.
+\item C++: numerous projects over 20 years.
+\item Python: numerous projects over 15 years; no experience of Numpy
+  or Numba.
+\item Java: PhD work 15 years ago, one minor project 5 years ago.
+\item Julia: one ongoing research project started 3 years ago.
+\item Javascript: a few hobby projects 5-7 years ago.
+\item Rust: no experience at all.
 \end{itemize}
+To add to the subjectivity, each benchmark was first implemented in
+Python then in other languages, with Rust typically being the last one
+to be implemented. Therefore the languages implemented last were
+supposedly easier, due to increased familiarity with the
+algorithm. For all reasons mentioned above, measuring the
+time spent implementing each benchmark in each language would be
+meaningless, therefore we limit ourselves to subjective opinion here.
+Keeping this in mind, we see a subset of perceived
+\emph{easy} languages, as in ``easy to program in and get things running
+with the expected outcome'', which consists of Python, Julia and
+JavaScript. These 
+easy languages typically allow to program the same algorithms faster
+than the other ones with the same results, performance considerations
+aside.
+On the other hand, we found the process of getting benchmarks to work
+with Rust to be much more tedious than with any other language,
+although this is certainly due to lack of experience. Nonetheless, the
+JavaScript implementation was typically easier than the C++ or Java ones
+despite having more experience with C++ and Java, so
+experience does not explain everything.
+Ultimately, there is little doubt that any experienced programmer in
+any of these languages would have no trouble implementing any of these
+benchmarks. Nonetheless, this programmer with experience in mostly C++
+and Python implemented every benchmark faster in Python, JavaScript or Julia
+than in C++.
 
+We also want to underline that no matter the language, it is possible
+to write both efficient and inefficient code. Familiarity and
+experience are beneficial; beginners in a language are more likely to
+write inefficient code. This being said, not every language is equal
+when it comes to documenting how to write efficient code. We note that
+the official Julia documentation has a whole section dedicated to that
+topic~\cite{julia-performance}. There also exists an automated tool to
+detect inefficient code patterns, based on the official
+documentation~\cite{julia-traceur}.
 
 \section{Implementation-specific notes}
 \subsection{Python}
@@ -442,39 +482,62 @@ study. However it is worth noting that this can be a concern in general.
 \subsection{Numba}
 Numba is not yet feature-complete for Numpy. A direct consequence is that some
 benchmarks cannot be implemented for Numba. For example
-\lstinline{numpy.insert()} is not implemented, but this function is
-needed for the $LN$ benchmark. Therefore the $LNS$ benchmark cannot be
+\verb|numpy.insert()| is not implemented, but this function is
+needed for the $LNS$ benchmark, therefore the $LNS$ benchmark cannot be
 implemented with Numba. Additionally, we were not able to implement
 the ESPPRC benchmark in a satisfying manner. In our experience, Numba
 error messages are sometimes unrelated to the issue causing them, or
 too obscure to make sense, keeping in mind the premises of this
 paper. It would certainly be possible to implement a dynamic
 programming algorithm for the ESPPRC benchmark using Numba's JIT
-compilationfeatures, however our conclusion is that it would not be
-possible to do so without expert knowledge of Numba.
+compilation features, however our conclusion is that it would not be
+possible to do so without advanced knowledge of Numba.
 
 Still, Numba is significant enough to be
 benchmarked and its current performances are an indication of what to
 expect in years to come, as the project matures.
 
 \subsection{Java}
-Mention inconsistencies between Java versions: code written for Java 8
-does not compile with Java 11. Because Pair is not in the API any
-more.
+The ecosystem of Java implementations and versions can be hard to
+navigate. There exist multiple compilers, multiple virtual
+machines, and there is a new Java version every 6 months, sometimes
+breaking backwards compatibility. The official reference
+implementation is OpenJDK since version 7~\cite{openjdk-reference}.
+We use OpenJDK version 11, which is the current long-term support version as
+of writing this article.
 
 \subsection{Rust}
-Issues:
-\begin{itemize}
-\item Changing from i32 to i64 is problematic somehow
-\item Not possible to have refs to both successors and predecessor in
-  Label, hence had to handle indices by hand in specific espprc implementation
-\end{itemize}
+As mentioned in Section~\ref{sec:espprc}, Rust does not allow a given
+\verb|struct| to have multiple references to the same \verb|struct|
+type. For this reason, we needed to develop a different implementation
+of the espprc benchmark. In general Rust puts restrictions on what
+constitutes valid code, for the sake of safety. This is a valuable
+feature in systems programming, which is the main application that Rust was
+designed for. This also means that writing code that compiles and runs
+is actually a more tedious task, but that once the code compiles,
+there is also a higher chance that it will run according to
+expectations, like with the Ada programming language for instance.
+
+In the context of this study, these benefits did not appear relevant
+however: each benchmark was programmed in all other languages as well,
+providing the same results as with the Rust implementation, while no
+evidence of memory leak was observed. As mentioned above, The Rust
+implementation was typically way more time-consuming than other
+implementations, although one reason for that is lack of
+experience. Nonetheless, in the context of this study, the generally
+assumed benefits of using Rust are not apparent, with the notable
+exception of good runtime performance.
 
 \section{Experiments}
 All programs are run concurrently on an AMD Ryzen 5 3600 6-Core
 Processor at 3.6 GHz with 16 GB RAM running Linux. Twelve threads can
 run in parallel, however in our setting at most 5 threads are used at
-any given time.
+any given time. For every benchmark and every instance, CPU times are
+reported as a ratio of a \emph{reference time} for that benchmark and
+instance. In practice, for each benchmark and instance, the reference
+time is the time required by the c++98 implementation for that
+benchmark and that instance. Therefore the c++98 implementation always
+has a CPU ratio of 1.
 
 Mention here compilers and compiler versions used.
 
@@ -485,6 +548,17 @@ Mention here compilers and compiler versions used.
 Also add a clang++ vs g++ comparison?
 \subsection{General cross-language comparison}
 \subsection{Cross-language comparison: fast languages}
+
+\subsection{Cross-platform comparison}
+We now look at the same benchmarks, using the same languages, but running
+in a different environment. We compare runs on an Intel i5-8265U
+4-core CPU at 1.6 GHz and on the previously mentioned AMD CPU. The
+goal is not to observe which CPU provides the best performance, rather
+to determine whether the experimental observations made with one CPU
+are valid with the other. For this reason, we stick to reporting CPU
+times as a ratio to the CPU time required by the c++98 implementation.
+
+Perhaps also run on WU cluster and observe differences.
 
 \section{Discussion}
 The question of what programming language to use when implementing
