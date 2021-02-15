@@ -48,14 +48,29 @@ language we can use ourselves.
 
 Philosophy: not necessarily the best
 implementation in the world, but a reasonably good one, i.e. one we
-can expect from an average student. Similar algorithm in various languages.
+can expect from an average student. Similar algorithm in various
+languages. Use as few external libraries as possible, but use them if
+needed.
 
-What we measure: run time of the algorithm only. Everything else
-(reading data, building initial solution) is not measured. Currently
-Julia, Javascript, Pypy, Numba also measure compilation time.
+\subsection{What we measure}
+In all proposed benchmarks, we measure the CPU clock time of the
+benchmarked algorithm. Every other task, such as reading input data or
+constructing an initial solution for local search benchmarks, is not
+measured. However if an auxilliary graph needs to be constructed every
+time the algorithm is run, then we also measure the construction of
+said auxilliary graph. This is the case for benchmarks \emph{maxflow}
+and \emph{espprc}.
 
-In order to represent a tour in heuristics we restrict ourselves to
-variable-size vectors, since they are necessary in most algorithms for
+In general, compilation time is not measured. However, some
+implementations do just-in-time (JIT) compilation, for example Julia,
+JavaScript, Pypy, Numba and Java. In such cases, this JIT compilation time is
+included in the running time of the algorithm. In general we measure
+clock time, i.e. the CPU budget used by the algorithm. In the case of
+JavaScript we measure wall time as we are not aware of any
+way to measure clock time in JavaScript.
+
+In order to represent a tour in heuristics we use variable-size
+vectors, since they are necessary in most algorithms for 
 vehicle routing, for instance to insert or delete a vertex from a
 tour.
 % This is the reason why we do
@@ -83,8 +98,8 @@ to be taken as indicators but not absolute truths. The intent of this
 study is not to declare a language the winner because it is
 consistently faster than others by a few percents, but rather to
 assess what kind of performance losses can be expected by, for
-example, using Python instead of C++. OR to assess what kind of
-performance gains can be achieved by using a JIT compiler for Python.
+example, using Python instead of C++. Another example is to assess what kind of
+performance gains can be achieved by using a JIT compiler for Python. 
 
 \section{The benchmarks}
 We consider five different benchmark algorithms that perform tasks
