@@ -46,11 +46,24 @@ Purposes: determine which language we can tell our students to
 use to implement routing optimisation routines. Also determine which
 language we can use ourselves.
 
-Philosophy: not necessarily the best
-implementation in the world, but a reasonably good one, i.e. one we
-can expect from an average student. Similar algorithm in various
-languages. Use as few external libraries as possible, but use them if
-needed.
+\subsection{Scope of this study}
+We want to compare the reasonably efficient implementation of various
+algorithms used in combinatorial optimization. In particular, we look
+at five algorithms that are commonly used in vehicle routing
+optimization. However these algorithms have features that are also
+present in other domains of optimization, such as modifying
+subsequences, inserting and removing elements in a sequence, or other
+operations on graphs.
+
+Our goal is not to provide the most efficient implementation of each
+algorithm for a set of languages, or even to use the most efficient
+algorithm to solve the given problems, but rather to use these
+algorithms as benchmarks, each capturing certain features currently
+encountered in optimization. We put ourselves in the situation of an
+average student having to implement these algorithms, and compare the
+performance of different programming languages in that context. We
+also assess the impact on performance of some implementation
+decisions, e.g. using a flat matrix representation.
 
 \subsection{What we measure}
 In all proposed benchmarks, we measure the CPU clock time of the
@@ -70,7 +83,7 @@ JavaScript we measure wall time as we are not aware of any
 way to measure clock time in JavaScript.
 
 In order to represent a tour in heuristics we use variable-size
-vectors, since they are necessary in most algorithms for 
+vectors. Dynamic size containers are necessary in most algorithms for 
 vehicle routing, for instance to insert or delete a vertex from a
 tour.
 % This is the reason why we do
@@ -87,7 +100,8 @@ exploration typically requires to evaluate many moves then perform
 only one of these moves. The complexity of performing a move is thus
 secondary and unlikely to be a performance bottleneck. Additionally,
 performing certain moves can actually be more efficient using a
-vector than using a linked list, e.g. inverting a subsequence.
+vector than using a linked list, e.g. inverting a subsequence in the
+context of 2-opt.
 
 \subsection{Limitations}
 Benchmarks are by definition limited in scope; any given benchmark
@@ -302,9 +316,19 @@ representative of the use case of branch and cut for vehicle routing problems.
 \section{Languages and implementations considered}
 We consider six different programming languages: C++, Python, Java,
 Julia, Rust and Javascript. Any rule of selection
-is arbitrary in nature; however, we indicate below, for each of these
-languages, the main reasons behind their selection. It is possible to
-add other languages to this list in the future.
+is arbitrary in nature; however we indicate below, for each of these
+languages, our perceived advantages of these languages, which justify
+their selection. It is possible to add other languages to this list in
+the future, and keep the benchmark collection alive in an online form.
+For a given language several implementations are possible, e.g. one
+with nested distance matrices and one with flat distance matrices. As
+a convention, implementations are named in lower-case letters, for
+example \emph{python-flat-matrix}. We also use the simplest names for
+the best implementations, i.e. \emph{python} uses a nested distance
+matrix because it performs better than \emph{python-flat-matrix}, but
+\emph{pypy} uses a flat matrix because it performs better than
+\emph{pypy-nested-matrix}. All implementations are summarised in
+Appendix~\ref{app:impl}.
 
 For each language, we may consider multiple \emph{implementations},
 which differ by which mechanisms or library they use. For
@@ -314,27 +338,110 @@ detailed individually below for each language. The code for all
 implementations can be found at
 \url{https://github.com/fa-bien/routing-benchmark}.
 
+It is difficult to properly measure the popularity of a programming
+language. There exist rankings, for example based on online
+searches~\cite{TIOBE} or on GitHub contributions~\cite{octoverse}. All
+these approaches have flaws. Basing an index on online searches is
+subject to all the biases and exploits that target online
+search. Measuring GitHub contributions is not clear, as
+there is no trivial way to decide what should count among
+repositories, number of lines written, number of commits,
+etc. Ultimately, language popularity for its own sake does not need to
+be a crucial factor in the choice of a programming language, especially for
+academic research. These aspects seem more important to us:
+\begin{itemize}
+\item The programs written in a given programming language should be
+  easily run on any computer. For that reason, we only look at
+  languages that are free and work under multiple operating
+  systems. The ability to run under Linux is especially important,
+  since it is typically the operating system of high-performance
+  computing (HPC) clusters~\cite{top500}.
+\item The language should be well documented, but also have online
+  resources for support. This in fact also depends on popularity.
+\end{itemize}
+
 \subsection{C++}
-Two implementations: c++14 vs c++98.
+C++ is one of the most popular programming languages in the World, and
+has been so for decades. Among its many features there is good
+runtime performance. In fact the performance is good enough that whole
+operating systems can be written in C++, for example Microsoft
+Windows. In fact C++ has so many features that it is often possible to
+implement the same algorithm using different subsets of the language,
+and a frequent criticism is that people and teams evolve into using
+only their own subset of the language.
 
-Flat vs nested matrix.
+We develop two C++ implementations of every benchmark, using the C++98
+and C++14 standards, which we call \emph{c++98} and \emph{c++14}. they
+both use a flat distance matrix. With C++98 we use references to
+objects, while with C++14 we use smart pointers such as
+\verb|shared_ptr|. Comparing these two implementations will allow us
+to evaluate the cost of smart pointers.
 
-static arrays too.
+For each benchmark the reference CPU time is provided by the c++14
+implementation. We also develop a variant of c++14 using a nested
+distance matrix, and another using static arrays.
 
 \subsection{Python}
-Python vs Pypy vs Numpy vs Numba.
-Flat vs nested matrix.
+Python is another of the most popular programming languages in the
+World, especially for tasks of machine learning in recent years. The
+base Python implementation is called \emph{python} and uses a nested
+distance matrix. There is also an implementation using a flat distance
+matrix, called \emph{python-flat-matrix}, and one using a nested
+distance matrix wrapped in function calls, called
+\emph{python-nested-matrix-function}.
+
+One issue with Python is that much of the code is not compiled, rather
+directly interpreted, which can lead to poor performance. One way to
+address that issue is to rely on libraries that are implemented in C,
+however that is not always possible. We consider alternative
+implementations in Python, all bringing different solutions to this
+issue.
+
+The simplest way to speed up the run time of a Python program is
+to run this program with Pypy~\cite{pypy} instead of the
+standard CPython interpreter. Pypy uses JIT compilation to speed
+things up. There is no need to modify the Python program, which is a
+strong advantage compared to library-based solutions or
+annotation-based solutions. Pypy's website claims that it is on
+average 4.2 times faster than CPython~\cite{pypy}, however this is
+just an average and actual numbers may vary a lot depending on the
+benchmark. We use both the python and python-flat-matrix
+implementations with Pypy, resulting in \emph{pypy-nested-matrix} and
+\emph{pypy} implementations, respectively.
+
+We also implement the benchmarks using Numpy arrays instead
+of standard Python lists. Numpy is one of the most popular external
+libraries for Python; it is coded in C for runtime
+performance~\cite{numpy}. Numpy performs especially well when using
+\emph{array operations}, for instance matrix multiplication. However
+the benchmarks that we consider do not take advantage of Numpy
+functions, only of its array data structure. Since Numpy provides
+multi-dimensional arrays, we use a two-dimensional array to represent
+the distancematrix. Additionally, we consider a flat matrix in
+implementation \emph{numpy-flat-matrix}.
+
+Numpy itself does not provide any kind of JIT compilation, but another
+Python package, Numba, performs JIT compilation when using Numpy
+arrays. Numba requires code annotation, therefore we annotate the
+Numpy implementations to take advantage of them with Numba.
 
 \subsection{Java}
-Flat vs nested matrix.
-static arrays too.
+Java is a very popular programming language of the past two
+decades. Java code is compiled to \emph{bytecode}, which is then run
+by a virtual machine (VM). The bytecode compiled on one computer can
+be run by a VM on another computer. Nonetheless, JIT compilation to
+native code happens dynamically at run time. The syntax is based on
+C/C++ syntax. The base Java implementation, \emph{java}, uses a flat
+distance matrix and a \verb|ArrayList<Integer>| object to represent a
+tour. We also implement a version with nested distance matrix,
+\emph{java-nested-matrix}, as well as a version with static arrays to
+represent a tour, \emph{java-static-arrays}.
 
 \subsection{Julia}
-General performance tips: read the specific doc section! One unique
-official document outlines how to write efficient code. there is also
-an automated tool for that.
+Julia is a relatively recent programming language. Mention dates for
+first release (0.4?) as well as 1.0.
 
-Flat vs nested matrix.
+Flat vs square matrix, mention 2-dimensional arrays.
 
 \subsection{Rust}
 
@@ -396,9 +503,9 @@ to elicit any difference in performance.
 
 \subsection{Other general cross-language considerations}
 Here we discuss considerations that are subjective in nature, as they
-relate to our experience implementing all benchmarks in all
-languages. We need to take into account our experience using various
-languages prior to the beginning of this work:
+relate to individual experience implementing all benchmarks in all
+languages. Experience using various languages prior to the beginning
+of this work needs to be taken into account:
 \begin{itemize}
 \item C++: numerous projects over 20 years.
 \item Python: numerous projects over 15 years; no experience of Numpy
@@ -408,10 +515,10 @@ languages prior to the beginning of this work:
 \item Javascript: a few hobby projects 5-7 years ago.
 \item Rust: no experience at all.
 \end{itemize}
-To add to the subjectivity, each benchmark was first implemented in
+To add to the subjectivity, each benchmark is first implemented in
 Python then in other languages, with Rust typically being the last one
-to be implemented. Therefore the languages implemented last were
-supposedly easier, due to increased familiarity with the
+to be implemented. Therefore the languages implemented last represent
+supposedly easier tasks, due to increased familiarity with the
 algorithm. For all reasons mentioned above, measuring the
 time spent implementing each benchmark in each language would be
 meaningless, therefore we limit ourselves to subjective opinion here.
@@ -479,8 +586,8 @@ that it involves one subtraction on top of the addition and
 multiplication used for 0-indexed languages.
 
 
-Using two threads instead of 1 improves performance by about 10\%,
-although it is unclear what the second thread is used for.
+% Using two threads instead of 1 improves performance by about 10\%,
+% although it is unclear what the second thread is used for.
 
 
 \subsection{JavaScript}
@@ -583,6 +690,21 @@ answer.
 \section*{Acknowledgements}
 The author is grateful to Sebastian Leitner for his valuable support
 in relation with the Rust implementation.
+
+\appendix
+
+\section{Summary of implementations}
+\label{app:impl}
+\begin{table}
+  \begin{tabular}{l|llll}
+    \toprule
+    Implementation & Language & Extra & Distance matrix representation
+    & Note \\
+    \midrule
+    \bottomrule   
+  \end{tabular}
+  \caption{Overview of all implementations}
+\end{table}
 
 \bibliographystyle{plain}
 \bibliography{benchmark}
