@@ -21,7 +21,8 @@
 
 \begin{document}
 
-\title{Benchmark!!1}
+\title{A benchmark for the implementation of standard vehicle routing
+  algorithms}
 \author{
 Fabien Tricoire$^{1}$ \\[1ex]
  \small $^1$Institute for Transport and Logistics Management,
@@ -116,6 +117,7 @@ example, using Python instead of C++. Another example is to assess what kind of
 performance gains can be achieved by using a JIT compiler for Python. 
 
 \section{The benchmarks}
+\label{sec:benchmark}
 We consider five different benchmark algorithms that perform tasks
 commonly encountered in transport optimization. Together they capture
 key aspects of computationally intensive tasks in heuristics and
@@ -377,7 +379,7 @@ objects, while with C++14 we use smart pointers such as
 \verb|shared_ptr|. Comparing these two implementations will allow us
 to evaluate the cost of smart pointers.
 
-For each benchmark the reference CPU time is provided by the c++14
+For each benchmark the reference CPU time is provided by the c++98
 implementation. We also develop a variant of c++14 using a nested
 distance matrix, and another using static arrays.
 
@@ -438,25 +440,57 @@ tour. We also implement a version with nested distance matrix,
 represent a tour, \emph{java-static-arrays}.
 
 \subsection{Julia}
-Julia is a relatively recent programming language. Mention dates for
-first release (0.4?) as well as 1.0.
+Julia is a relatively recent programming language. It is a
+general-purpose language but it is also particularly aimed at
+computationally intensive tasks such as numerical
+analysis~\cite{Julia-2017}. Version 1.0 was 
+released in 2018 and the language is well-documented and has a strong
+community.
 
-Flat vs square matrix, mention 2-dimensional arrays.
+Compilation happens in a JIT fashion. Like Numpy but
+unlike all other programming languages considered, Julia supports
+multi-dimensional arrays, therefore a native two-dimensional array can be
+used to represent a distance matrix. We also develop an
+implementation using flat matrix representation in Julia, called
+\emph{julia-flat-matrix}; we will determine which version is better
+through experiment.
+
+One valuable feature of Julia is the fact that projects have an
+environment, including package dependencies with specific
+versions. The language makes it easy to \emph{instantiate} the
+project environment, i.e. recreate the same environment in which the
+project was developed, with the same packages in the same
+versions. This provides safety from new library versions which break
+backward compatibility.
 
 \subsection{Rust}
+Rust is also relatively recent, with version 1.0 released in 2015. It
+is a general-purpose language with an emphasis on memory safety and
+on performance. Notable software using Rust include Firefox, Dropbox
+and Cloudflare~\cite{rust-lang}.
+
+Programs in Rust are pre-compiled, like in C++ for
+instance. Like Julia, the language is well documented and has a strong
+community. Also like Julia, projects have an environment, and it is
+easy to recreate the environment for a given project, including
+dependencies and their specific version, which again provides safety
+from backward-compatibility-breaking library updates. The \emph{rust}
+implementation uses a flat matrix representation.
 
 \subsection{JavaScript}
-JavaScript is not expected to perform as well as, say, C++. However
-there are several reasons why it can be appealing to implement routing
-algorithms in JavaScript:
+JavaScript is likely one of the most popular programming languages in
+the World, as it is used on countless websites as well as mobile
+applications based on web technology. JavaScript is not expected to
+perform as well as, say, C++. However there are several reasons why it
+can be appealing to implement routing algorithms in JavaScript:
 \begin{itemize}
 \item Any program written in JavaScript can run on virtually any
   computer with a modern web browser, including smartphones.
 \item Integrating JavaScript with a web interface is especially easy.
 \item JavaScript engines have received considerable attention from
-  major companies and are the subject of fierce competition on
-  performance. As a result they have seen vast performance
-  improvements over the years and the trend is likely to continue.
+  major companies and been the subject of fierce competition in
+  relation with web browsers engines. As a result they have seen vast
+  performance improvements over the years and the trend is likely to continue.
 \end{itemize}
 
 We use Node.js, which allows to run JavaScript programs from the
@@ -464,7 +498,9 @@ command line. This means that there is in fact not even the need for a
 web browser. Node.js currently uses Google Chrome v8's JavaScript
 engine~\cite{nodejs}.
 
-Flat vs nested.
+The \emph{javascript} implementation uses a flat matrix representation
+but there is also an implementation using nested matrix representation,
+called \emph{javascript-flat-matrix}.
 
 \subsection{Considerations on how to implement a distance matrix}
 Perhaps the most straightforward way to implement a distance matrix in
@@ -661,7 +697,21 @@ time is the time required by the c++98 implementation for that
 benchmark and that instance. Therefore the c++98 implementation always
 has a CPU ratio of 1.
 
-Mention here compilers and compiler versions used.
+A summary of all versions used for compilers and interpreters is
+provided in Appendix~\ref{app:lang}.
+
+\subsection{Benchmark data}
+Each instance file contains one $n \times n$ distance matrix as well
+as $p$ randomly generated permutations, which are used as starting
+\emph{seeds} for the algorithms (e.g. as starting solution for 2-opt).
+For $n$ taking each value of $\{20, 40, 60\}$ and fixing $p = 1000$ we
+generate 40 instance files, for a total of 120 instance files. Each
+instance file contains 1000 permutations, therefore is run 1000
+different times for each benchmark. As mentioned in
+Section~\label{sec:benchmark} distances are Euclidean distances multiplied
+by 100 and truncated to their integer part. In the following each data
+point represents the total CPU time for running one implementation
+for each of the 1000 permutations of one given instance file.
 
 \subsection{Impact of using a flat matrix}
 \subsection{Impact of using static arrays}
@@ -691,6 +741,9 @@ answer.
 The author is grateful to Sebastian Leitner for his valuable support
 in relation with the Rust implementation.
 
+\bibliographystyle{plain}
+\bibliography{benchmark}
+
 \appendix
 
 \section{Summary of implementations}
@@ -706,7 +759,26 @@ in relation with the Rust implementation.
   \caption{Overview of all implementations}
 \end{table}
 
-\bibliographystyle{plain}
-\bibliography{benchmark}
+\section{Summary of language and compiler versions}
+\label{app:lang}
+\begin{table}
+  \begin{tabular}{l|l}
+    \toprule
+    Language/tool & language or compiler version & options \\
+    \midrule
+    C++14 & g++ & -Wall -ansi -pedantic -O3 -std=c++14 \\
+    C++98 & g++ & -Wall -ansi -pedantic -O3 -std=c++98 \\
+    Python & & \\
+    Pypy & & \\
+    Numpy & & \\
+    Numba & & \\
+    Java &  & \\
+    Julia & 1.5.3 & --check-bounds=no --inline=yes -O3 -t 1 \\
+    Rust & & \\
+    JavaScript & Node & \\
+    \bottomrule   
+  \end{tabular}
+  \caption{Overview of all implementations}
+\end{table}
 
 \end{document}
