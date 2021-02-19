@@ -44,8 +44,8 @@ function benchmark_many(dirname::String, benchmarkname::String="2-opt")
     for fname in readdir(dirname)
         d, sols = read_data(joinpath(dirname, fname), Int)
         n, l = benchmark_one(d, sols, benchmarkname)
-        println(join((basename(pwd()), VERSION, benchmarkname, fname,
-                      string(d.n),
+        println(join((basename(pwd()), "Julia", "square", VERSION,
+                      benchmarkname, fname, string(d.n),
                       string(size(sols,1)), string(n), string(l)),
                      ","))
         nimpr += n

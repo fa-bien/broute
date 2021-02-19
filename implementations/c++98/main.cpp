@@ -109,7 +109,7 @@ int main (int argc, char * argv[]) {
 	vector<TSPSolution<int> > solutions = all_data.second;
 	pair<int, double> res = benchmark_one<int>(data, solutions,
 						   benchmarkname);
-	cout << "c++," << COMPILER << " " << __VERSION__ << ","
+	cout << "c++,C++98,flat," << COMPILER << " " << __VERSION__ << ","
 	     << benchmarkname << ","
 	     << basename(argv[1]) << ","
 	     << data.n() << ","

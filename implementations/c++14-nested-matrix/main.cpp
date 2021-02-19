@@ -100,7 +100,7 @@ int main (int argc, char * argv[]) {
 	    benchmarkname = argv[2];
 	}
 	auto res = benchmark_one<int>(solutions, benchmarkname);
-	cout << "c++," << COMPILER << " " << __VERSION__ << ","
+	cout << "c++,C++14,nested," << COMPILER << " " << __VERSION__ << ","
 	     << benchmarkname << ","
 	     << basename(argv[1]) << ","
 	     << solutions[0].data()->n() << ","

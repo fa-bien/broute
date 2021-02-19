@@ -611,7 +611,7 @@ function benchmarkOne(path, benchmarkname) {
 	totalTime += t2[1] / 1e9;
 	nimpr += n;
     }
-    console.log(['javascript', benchmarkname, fname,
+    console.log(['javascript', 'JavaScript', 'flat', benchmarkname, fname,
 		 data.n, solutions.length, nimpr, totalTime].join());
 }
 

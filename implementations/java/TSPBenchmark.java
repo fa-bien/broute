@@ -108,8 +108,8 @@ public class TSPBenchmark{
 		TSPSolution[] solutions = allData.getValue();
 		Pair<Integer, Double> res = benchmark_one(solutions,
 							  benchmarkname);
-		System.out.println("java," + benchmarkname + "," + basename +
-				   "," + d.n() + "," +
+		System.out.println("java,Java,flat," + benchmarkname + "," +
+                                   basename + "," + d.n() + "," +
 				   solutions.length + "," + res.getKey()
 				   + "," + res.getValue());
 	    } catch (IOException e) {

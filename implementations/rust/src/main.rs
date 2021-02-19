@@ -91,7 +91,7 @@ fn benchmark_many(dirname: &str, benchmarkname: &str) {
         let full_name = t.to_str().unwrap();
         let (mut data, mut solutions) = read_data(full_name);
         let (n, l) = benchmark_one(&mut data, &mut solutions, benchmarkname);
-        println!("rust,{},{},{},{},{},{},{}",
+        println!("rust,Rust,flat,{},{},{},{},{},{},{}",
                  version(), benchmarkname,
                  base.file_name().to_str().unwrap(),
                  data.n, solutions.len(), n, l);

@@ -62,7 +62,7 @@ def benchmarkmany(dirname, benchmarkname='2-opt'):
     for fn in os.listdir(dirname):
         data, solutions = loadfromfile(os.path.join(dirname, fn))
         nimpr, t = benchmarkone(solutions, benchmarkname)
-        print(','.join( (os.path.basename(os.getcwd()),
+        print(','.join( (os.path.basename(os.getcwd()), 'Python', 'square',
                          sys.implementation.name + ' ' + sys.version.split()[0],
                          benchmarkname,
                          os.path.basename(fn), str(data.n),
