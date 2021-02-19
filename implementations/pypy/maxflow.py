@@ -1,1 +1,1 @@
-../python/maxflow.py
+../python-flat-matrix/maxflow.py

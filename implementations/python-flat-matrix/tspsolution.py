@@ -3,6 +3,9 @@ import copy
 from itertools import chain
 
 import tspdata
+import espprc
+import espprcindex
+import maxflow
 
 class TSPSolution:
     def __init__(self, data, permutation):
@@ -90,6 +93,53 @@ class TSPSolution:
             self.nodes = tmp
         return checksum
 
+    # Max. length constraint: current tour length is max. length
+    # Each node consumes one resource per 1-bit of its binary representation,
+    # the first bit being bit 0
+    # For instance 6 consumes 1 unit of resource 1 and 1 unit of resource 2,
+    # since 6 = 2^1 + 2^2
+    def espprc(self, nresources=6, resourcecapacity=1, index=False):
+        n, tour, d = self.data.n, self.nodes, self.data.d
+        # update reduced costs
+        dual = [ 0.0 for x in range(n) ]
+        for (i, j) in zip(tour[:-1], tour[1:]):
+            dual[j] = d(i, j)
+        for i in range(n):
+            for j in range(n):
+                self.data.setaux(i, j, float(d(i, j) - dual[j]))
+        # max len: sum of best assignments
+        maxlen = sum([ min([d(i, j) for j in range(n) if i != j])
+                       for i in range(n)])
+        if not index:
+            e = espprc.ESPPRC(n, d, self.data.aux,
+                              self.nodes, nresources, resourcecapacity, maxlen)
+        else:
+            e = espprcindex.ESPPRCLC(n, d, self.data.aux,
+                                     self.nodes, nresources, resourcecapacity,
+                                     maxlen)
+        return int(e.solve())
+
+    # max. flow
+    # arc capacity = arc cost divided by ten but only for those arcs that are
+    # above the average value of arcs with the same destination
+    def maxflow(self, algorithm='EK'):
+        n, tour, d = self.data.n, self.nodes, self.data.d
+        cap, flow = self.data.aux, self.data.aux2
+        setcap, setflow = self.data.setaux, self.data.setaux2
+        # first we build the capacity graph
+        t = [ 0.0 for x in range(n) ]
+        for (i, j) in zip(tour[:-1], tour[1:]):
+            t[j] = d(i, j)
+        for j in range(n):
+            for i in range(n):
+                setcap(i, j, d(i, j) / 1000 if d(i, j)>t[j] else 0.0)
+        # then we solve it for each non-0 node as sink
+        checksum = 0.0
+        for sink in range(1, n):
+            mf = maxflow.edmondskarp(cap, flow, setflow, n, 0, sink)
+            checksum += mf
+        return int(checksum)
+    
     def cost(self):
         total = 0
         for i, j in zip(self.nodes[:-1], self.nodes[1:]):

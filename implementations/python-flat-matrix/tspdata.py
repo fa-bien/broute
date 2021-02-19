@@ -11,11 +11,25 @@ mapsize = 100
 class TSPData:
     def __init__(self, n, d):
         self.n = n
-        self.dist = functools.reduce(lambda x, y: x+y, d)
+        self._d = functools.reduce(lambda x, y: x+y, d)
+        self._aux = [ float(x) for x in self._d ]
+        self._aux2 = [ float(x) for x in self._d ]
 
     def d(self, i, j):
-        return self.dist[i*self.n+j]
-        
+        return self._d[i*self.n+j]
+    
+    def aux(self, i, j):
+        return self._aux[i*self.n+j]
+
+    def setaux(self, i, j, value):
+        self._aux[i*self.n+j] = value
+    
+    def aux2(self, i, j):
+        return self._aux2[i*self.n+j]
+    
+    def setaux2(self, i, j, value):
+        self._aux2[i*self.n+j] = value
+    
     def matrixstring(self):
         rows = [ ' '.join(str(x) for x in row) for row in self.d ]
         return '\n'.join(rows)
