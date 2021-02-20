@@ -10,8 +10,8 @@ instdir=`pwd`'/instances'
 # Number of threads = environment variable THREADS or default value
 [[ -z "$THREADS" ]] && THREADS=3
 
-all_langs="c++14 c++98 c++14-hybrid-matrix c++14-nested-matrix c++14-static-arrays java java-nested-matrix javascript javascript-nested-matrix java-static-arrays julia-array julia-flat-matrix julia-square-matrix numba numba-flat-matrix numpy numpy-flat-matrix pypy pypy-nested-matrix python python-flat-matrix python-nested-matrix-function rust"
-twoopt_langs="c++14 c++98 c++14-hybrid-matrix c++14-nested-matrix c++14-static-arrays java java-nested-matrix javascript javascript-nested-matrix java-static-arrays julia-array julia-flat-matrix julia-square-matrix numba numba-flat-matrix numpy pypy pypy-nested-matrix python python-flat-matrix python-nested-matrix-function rust"
+all_langs="c++14 c++98 c++14-hybrid-matrix c++14-nested-matrix c++14-static-arrays java java-nested-matrix javascript javascript-nested-matrix java-static-arrays julia-array julia-flat-matrix julia-square-matrix numba numba-flat-matrix numpy numpy-flat-matrix pypy pypy-nested-matrix python python-flat-matrix python-flat-matrix-no-function python-nested-matrix-function rust"
+twoopt_langs="c++14 c++98 c++14-hybrid-matrix c++14-nested-matrix c++14-static-arrays java java-nested-matrix javascript javascript-nested-matrix java-static-arrays julia-array julia-flat-matrix julia-square-matrix numba numba-flat-matrix numpy pypy pypy-nested-matrix python python-flat-matrix python-flat-matrix-no-function python-nested-matrix-function rust"
 oropt_langs=$twoopt_langs
 lns_langs="c++14 c++98 java javascript julia-array julia-flat-matrix julia-square-matrix pypy python rust"
 espprc_langs="c++14 c++98 java javascript julia-array julia-flat-matrix julia-square-matrix pypy python"
