@@ -612,7 +612,7 @@ function benchmarkOne(path, benchmarkname) {
 	nimpr += n;
     }
     console.log(['javascript', 'JavaScript', 'flat', benchmarkname, fname,
-		 data.n, solutions.length, nimpr, totalTime].join());
+		 data.n, solutions.length, nimpr, totalTime].join(','));
 }
 
 function main(args) {
