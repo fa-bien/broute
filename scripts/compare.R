@@ -3,62 +3,59 @@
 library(dplyr)
 library(ggplot2)
 
-## reference language for ratio calculation
-reflang <- 'c++'
-
-## read languages to compare from command line; if none given, use default
-defaultlanguages <- c('c++', 'c++98', 'julia-flat-matrix', 'rust')
-languages <- commandArgs(trailingOnly=TRUE)
-if (length(languages)==0) {
-    languages <- defaultlanguages
-}
-
-## make sure that data for the default language is loaded as well
-if (! (reflang %in% languages)) {
-    languages <- c(reflang, languages)
-}
-
-benchmarks <- c('2-opt', 'Or-opt', 'lns')
+## reference implementation for ratio calculation
+refimpl <- 'c++14'
+csvdir <- 'csv/Xeon'
 
 ## first we glue all data together in one data frame
-fnames <- list.files(pattern='*.csv')
+fnames <- list.files(path=csvdir, pattern='*.csv')
 
-print(fnames)
-
-all_runs <- read.csv(fnames[1])
+all_runs <- read.csv(paste0(csvdir, '/', fnames[1]))
 for(fn in fnames[2:length(fnames)]) {
-    tmp <- read.csv(fn)
+    tmp <- read.csv(paste0(csvdir, '/', fn))
     all_runs <- rbind(all_runs, tmp)
 }
 
-for (col in c('language', 'version', 'benchmark', 'instance')) {
-   all_runs[,col] <- factor(all_runs[,col])
+for (col in c('implementation', 'language', 'matrix', 'version',
+              'benchmark', 'instance')) {
+    all_runs[,col] <- factor(all_runs[,col])
 }
 
-for(bench in benchmarks) {
-    runs <- subset(all_runs, benchmark == bench)
-    
-    ## ## All runtimes in seconds
-    ## pdf(paste0('language_comparison_absolute_', bench, '.pdf'))
-    ## p  <- ggplot(runs, aes(x=factor(n), y=time, fill=factor(language))) +
-    ##     geom_boxplot() + labs(x='n', y='CPU time (s)', fill='Language',
-    ##                           title=paste('Absolute CPU time for', bench,
-    ##                                       'benchmark'))
-    ## print(p)
-    ## dev.off()
-    
-    ## All runtimes as a ratio of C++ run time
-    runs <- arrange(runs, language, instance)
-    refdata <- filter(runs, language==reflang)
-    runs$reference <- refdata$time
-    runs$normalised <- runs$time / runs$reference
-    
-    pdf(paste0('language_comparison_relative_', bench, '.pdf'))
-    p  <- ggplot(runs, aes(x=factor(n), y=normalised, fill=factor(language))) +
-        geom_boxplot() + labs(x='n', y='CPU time (ratio of C++ CPU time)',
-                              fill='Language',
-                              title=paste('CPU time relative to C++ for', bench,
-                                          'benchmark'))
-    print(p)
-    dev.off()
+## we isolate CPU times of referenec implementation
+refdata <- filter(all_runs, implementation==refimpl)
+refdata$reftime <- refdata$time
+normalised <- left_join(all_runs, refdata,
+                        by=c('benchmark', 'instance', 'checksum'))
+## We take this opportunity to check checksum consistency
+if (nrow(all_runs) != nrow(normalised)) {
+    print('Error: checksum inconsistency')
+    quit(save='no')
+}
+## now create a new data frame with normalised times
+runs <- arrange(all_runs, implementation, benchmark, instance)
+normtmp <- arrange(normalised, implementation.x, benchmark, instance)
+runs$reftime <- normtmp$reftime
+runs$normalised <- runs$time / runs$reftime
+
+## Now we can generate charts
+## distance matrix representation comparison
+ds <- subset(runs,
+             implementation %in% c('c++14', 'c++14-nested-matrix',
+                                   'java', 'java-nested-matrix',
+                                   'javascript', 'javascript-nested-matrix',
+                                   'julia-flat-matrix', 'julia-square-matrix'))
+
+for (benchmark in c("2-opt", "Or-opt")) {
+    for (n in c(20, 40, 60)) {
+        pdf(paste0('impact_flat_matrix-', benchmark, '-', n, '.pdf'))
+        title <- paste0('Relative CPU effort per language depending on matrix representation\n(', benchmark, ', ', n, ' cities)')
+        p <- ggplot(subset(ds, n == 20 & benchmark == benchmark),
+                    aes(x=language, y=normalised, fill=matrix)) +
+            geom_boxplot() + labs(x='Language',
+                                  y='CPU time (ratio of C++14 time)',
+                                  fill='Matrix representation',
+                                  title=title)
+        print(p)
+        dev.off()
+    }
 }
