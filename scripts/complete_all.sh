@@ -47,7 +47,7 @@ for benchmark in "${!benchmarks[@]}"; do
 	(echo -e "Running \e[1m$lang\e[0m implementation of \e[1m$benchmark\e[0m benchmark"
 	 (pushd $impldir'/'$lang > /dev/null
 	  # [[ -f build.sh ]] && ./build.sh
-	  echo "language,version,benchmark,instance,n,nsolutions,checksum,time"
+	  echo "implementation,language,matrix,version,benchmark,instance,n,nsolutions,checksum,time"
 	  ./run_benchmark.sh $instdir $benchmark
 	  popd > /dev/null
 	 ) > $csvfname
