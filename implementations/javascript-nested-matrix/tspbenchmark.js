@@ -170,7 +170,8 @@ function benchmarkOne(path, benchmarkname) {
 	totalTime += t2[1] / 1e9;
 	nimpr += n;
     }
-    console.log(['javascript', 'JavaScript', 'nested', benchmarkname, fname,
+    console.log(['javascript-nested-matrix', 'JavaScript', 'nested',
+                 benchmarkname, fname,
 		 data.n, solutions.length, nimpr, totalTime].join());
 }
 
