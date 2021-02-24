@@ -5,7 +5,7 @@ library(ggplot2)
 
 ## reference implementation for ratio calculation
 refimpl <- 'c++14'
-csvdir <- 'csv/Xeon'
+csvdir <- 'csv/ryzen_5_3600'
 
 ## first we glue all data together in one data frame
 fnames <- list.files(path=csvdir, pattern='*.csv')
@@ -43,15 +43,16 @@ ds <- subset(runs,
              implementation %in% c('c++14', 'c++14-nested-matrix',
                                    'java', 'java-nested-matrix',
                                    'javascript', 'javascript-nested-matrix',
-                                   'julia-flat-matrix', 'julia-square-matrix'))
+                                   'julia-flat-matrix', 'julia-array',
+                                   'python', 'python-flat-matrix'))
 
-for (benchmark in c("2-opt", "Or-opt")) {
-    for (n in c(20, 40, 60)) {
-        pdf(paste0('impact_flat_matrix-', benchmark, '-', n, '.pdf'))
-        title <- paste0('Relative CPU effort per language depending on matrix representation\n(', benchmark, ', ', n, ' cities)')
-        p <- ggplot(subset(ds, n == 20 & benchmark == benchmark),
-                    aes(x=language, y=normalised, fill=matrix)) +
-            geom_boxplot() + labs(x='Language',
+for (lang in c('C++14', 'Java', 'JavaScript', 'Julia', 'Python')) {
+    for (bench in c("2-opt", "Or-opt")) {
+        pdf(paste0('matrix_representation-', lang, '-', bench, '.pdf'))
+        title <- paste0('Relative CPU effort depending on matrix representation\n(', lang, ', ', bench, ')')
+        p <- ggplot(subset(ds, language == lang & benchmark == bench),
+                    aes(x=factor(n), y=normalised, fill=matrix)) +
+            geom_boxplot() + labs(x='n',
                                   y='CPU time (ratio of C++14 time)',
                                   fill='Matrix representation',
                                   title=title)
