@@ -48,7 +48,8 @@ protected:
     bool firstorimprovement() {
 	for (unsigned int i=1; i < nodes_.size() - 1; i++) {
 	    for (unsigned int l=1;
-		 l < 1 + min((long unsigned)3, nodes_.size() - 1 - i); l++) {
+		 l < 1 + min((unsigned int) 3,
+                             (int) nodes_.size() - 1 - i); l++) {
 		for (unsigned int p=0; p < i-1; p++) {
 		    int delta = or_delta(i, l, p);
 		    if (delta < 0) {
