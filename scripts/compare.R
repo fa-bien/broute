@@ -5,7 +5,10 @@ library(ggplot2)
 
 ## reference implementation for ratio calculation
 refimpl <- 'c++14'
-csvdir <- 'csv/ryzen_5_3600'
+
+## result directory as first command line argument
+args = commandArgs(trailingOnly=TRUE)
+csvdir <- ifelse(length(args) ==0, 'results/ryzen_5_3600', args[1])
 
 ## first we glue all data together in one data frame
 fnames <- list.files(path=csvdir, pattern='*.csv')
