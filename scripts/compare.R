@@ -126,7 +126,7 @@ for (bench in c('2-opt', 'Or-opt')) {
                     aes(x=factor(n), y=normalised, fill=matrix)) +
             geom_boxplot() + labs(x='n',
                                   y='CPU time (ratio of C++14 time)',
-                                  fill='Python interpreter',
+                                  fill='Matrix representation',
                                   title=title) + theme_bw()
         print(p)
         dev.off()
@@ -137,8 +137,8 @@ for (bench in c('2-opt', 'Or-opt')) {
 pythonbest <- subset(ds,
                      implementation %in% c('python', 'pypy', 'numpy', 'numba'))
 for (bench in c('2-opt', 'Or-opt', 'lns', 'espprc', 'maxflow')) {
-    title <- paste0('Relative CPU effort of Python interpreters (', bench, ')')
-    pdf(paste0('python_interpreters-', bench, '-boxplot.pdf'))
+    title <-paste0('Relative CPU effort of Python implementations (', bench,')')
+    pdf(paste0('python_implementations-', bench, '-boxplot.pdf'))
     p <- ggplot(subset(pythonbest, benchmark == bench),
                 aes(x=factor(n), y=normalised,
                     fill=factor(interpreter,
@@ -150,7 +150,7 @@ for (bench in c('2-opt', 'Or-opt', 'lns', 'espprc', 'maxflow')) {
     print(p)
     dev.off()
 }
-for (bench in c('2-opt', 'Or-opt')) {
+for (bench in c('2-opt', 'Or-opt', 'maxflow')) {
     title <- paste0('Pypy vs Numba (', bench, ')')
     pdf(paste0('pypy_vs_numba-', bench, '-boxplot.pdf'))
     p <- ggplot(subset(pythonbest, benchmark == bench &
