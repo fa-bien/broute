@@ -16,7 +16,7 @@ oropt_langs=$twoopt_langs
 lns_langs="c++14 c++98 java javascript julia-array julia-flat-matrix julia-square-matrix pypy python rust"
 espprc_langs="c++14 c++98 java javascript julia-array julia-flat-matrix julia-square-matrix pypy python"
 espprcindex_langs="c++14 c++98 java javascript julia-array julia-flat-matrix julia-square-matrix pypy python rust"
-maxflow_langs="c++14 c++98 java javascript julia-array julia-flat-matrix julia-square-matrix pypy python rust"
+maxflow_langs="c++14 c++98 java javascript julia-array julia-flat-matrix julia-square-matrix numba pypy python rust"
 declare -A benchmarks=( ["2-opt"]=$twoopt_langs
 			["Or-opt"]=$oropt_langs
 			["lns"]=$lns_langs

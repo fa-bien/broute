@@ -94,7 +94,7 @@ def make_profiles(instances, data):
     #               titleprefix=titlep, fileprefix=filep)
     
     # Zoom in on Pypy vs Numba
-    benchmarks = ('2-opt', 'Or-opt', 'espprc', 'maxflow')
+    benchmarks = ('2-opt', 'Or-opt', 'maxflow')
     comps = [ ('', ('pypy', 'numba'), ('Pypy', 'Numba')) ]
     titlep = 'Pypy vs Numba'
     filep = 'pypy_vs_numba'
