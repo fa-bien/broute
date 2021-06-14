@@ -58,17 +58,17 @@ def makeperfprofs(instances, data, benchmarks, comps,
 def make_profiles(instances, data):
     
     # Impact of using a flat matrix
-    benchmarks = ('2-opt', 'Or-opt')
+    benchmarks = ('2-opt', 'Or-opt', 'lns')
     comps = [ ('C++14', ('c++14', 'c++14-nested-matrix'), ('Flat', 'Nested')),
               ('Java', ('java', 'java-nested-matrix'), ('Flat', 'Nested')),
               ('JavaScript', ('javascript', 'javascript-nested-matrix'),
                ('Flat', 'Nested')),
               ('Julia', ('julia-flat-matrix', 'julia-array'),
                ('Flat', 'Square')),
-              ('CPython', ('python-flat-matrix', 'python'), ('Flat', 'Nested')),
-              ('Pypy', ('pypy', 'pypy-nested-matrix'), ('Flat', 'Nested')),
-              ('Numba', ('numba-flat-matrix', 'numba'), ('Flat', 'Square')),
-              ('Numpy', ('numpy-flat-matrix', 'numpy'), ('Flat', 'Square')),
+              # ('CPython', ('python-flat-matrix', 'python'), ('Flat', 'Nested')),
+              # ('Pypy', ('pypy', 'pypy-nested-matrix'), ('Flat', 'Nested')),
+              # ('Numba', ('numba-flat-matrix', 'numba'), ('Flat', 'Square')),
+              # ('Numpy', ('numpy-flat-matrix', 'numpy'), ('Flat', 'Square')),
              ]
     titlep = 'CPU performance of matrix representation'
     filep = 'matrix-'
