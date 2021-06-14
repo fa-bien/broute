@@ -1,4 +1,6 @@
 import itertools as it
+import sys
+
 import numpy as np
 from numba import jit
 
