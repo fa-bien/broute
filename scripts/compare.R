@@ -49,7 +49,7 @@ ds <- subset(runs,
                                    'javascript', 'javascript-nested-matrix',
                                    'julia-flat-matrix', 'julia-array'))
 for (lang in c('C++14', 'Java', 'JavaScript', 'Julia')) {
-    for (bench in c('2-opt', 'Or-opt')) {
+    for (bench in c('2-opt', 'Or-opt', 'lns')) {
         pdf(paste0('matrix-', lang, '-', bench, '-boxplot.pdf'))
         title <- paste0(lang, ': relative CPU effort of matrix representations (', bench, ')')
         p <- ggplot(subset(ds, language == lang & benchmark == bench),
