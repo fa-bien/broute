@@ -76,6 +76,7 @@ def make_profiles(instances, data):
                   titleprefix=titlep, fileprefix=filep)
     
     # Impact of using static arrays
+    benchmarks = ('2-opt', 'Or-opt')
     comps = [ ('C++14', ('c++14', 'c++14-static-arrays'),('Dynamic', 'Static')),
               ('Java', ('java', 'java-static-arrays'), ('Dynamic', 'Static')) ]
     titlep = 'CPU performance of array data structure'
@@ -84,7 +85,7 @@ def make_profiles(instances, data):
                   titleprefix=titlep, fileprefix=filep)
     
     ## Comparison of Python implementation: performance of Python interpreters
-    # we proceed in two steps since Numba only implements 2 benchmarks
+    # 2-Opt and Or-opt are enough to weed out CPython and Numpy
     benchmarks = ('2-opt', 'Or-opt')
     comps = [ ('', ('python', 'pypy', 'numpy', 'numba'),
                ('CPython', 'Pypy', 'Numpy', 'Numba')) ]
