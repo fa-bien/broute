@@ -32,6 +32,9 @@ class TSPSolution:
         return aux_oropt(tour, d, n)
 
     def lns(self, niter=10):
+        sys.stderr.write('Not valid: numba implementation of lns\n')
+        sys.stderr.write('\tdeleting from array is not implemented in numba\n')
+        sys.exit(95)
         return float('Inf')
         tour, d, n = self.nodes, self.data.d, self.data.n
         return aux_lns(tour, d, n, niter)    
