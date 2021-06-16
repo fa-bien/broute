@@ -145,7 +145,7 @@ for (bench in c('2-opt', 'Or-opt', 'lns', 'espprc', 'maxflow')) {
                                 levels=c('CPython','Pypy','Numpy','Numba')))) +
         geom_boxplot() + labs(x='n',
                               y='CPU time (ratio of C++14 time)',
-                              fill='Interpreter',
+                              fill='Implementation',
                               title=title) + theme_bw()
     print(p)
     dev.off()
@@ -159,7 +159,7 @@ for (bench in c('2-opt', 'Or-opt', 'maxflow')) {
                     fill=factor(interpreter,))) +
         geom_boxplot() + labs(x='n',
                               y='CPU time (ratio of C++14 time)',
-                              fill='Interpreter',
+                              fill='Implementation',
                               title=title) + theme_bw()
     print(p)
     dev.off()
