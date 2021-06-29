@@ -50,9 +50,6 @@ def makeperfprofs(instances, data, benchmarks, comps,
         for lang, methods, names in comps:
             title = titleprefix + ' (' + (lang + ', ' if lang != '' else '') + bench + ')'
             fName = fileprefix + lang + '-' + bench + '-perfprof.pdf'
-
-            print(fName)
-            
             pp.plotPerformanceProfile(methods, instances, results[bench],
                                       title=title,
                                       fName=fName,
