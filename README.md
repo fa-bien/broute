@@ -4,9 +4,9 @@ BROUTE is a benchmarking suite for routing optimization algorithms, see descript
 
 ## General structure
 
-All implementations are a subdirectory of the "implementations" directory. New implementations should also go there.
+All implementations are a subdirectory of the `implementations` directory. New implementations should also go there.
 
-Each implementation directory contains a script called `run_benchmark.sh` that takes two arguments: 
+Each implementation directory contains a script called `run_benchmark.sh` which takes two arguments: 
 1. the directory containing input data files to consider for the benchmark
 1. the benchmark name
 
