@@ -7,6 +7,7 @@ import os
 import tspdata
 import tspsolution
 
+
 # load experimental data from file
 def loadfromfile(fname):
     n = 0
@@ -29,23 +30,24 @@ def loadfromfile(fname):
     data = tspdata.TSPData(n, d)
     return data, [tspsolution.TSPSolution(data, x) for x in tours]
 
+
 # Solve each starting solution using a given benchmark
 # return the CPU time spent
 def benchmarkone(solutions, benchmarkname):
     if benchmarkname == '2-opt':
-        bench = lambda x: x.two_opt()
+        def bench(x): return x.two_opt()
     elif benchmarkname.lower() == 'lns':
-        bench = lambda x: x.lns()
+        def bench(x): return x.lns()
     elif benchmarkname == 'Or-opt':
-        bench = lambda x: x.or_opt()
+        def bench(x): return x.or_opt()
     elif benchmarkname == 'espprc':
-        bench = lambda x: x.espprc()
+        def bench(x): return x.espprc()
     elif benchmarkname == 'espprc-index':
-        bench = lambda x: x.espprc(index=True)
+        def bench(x): return x.espprc(index=True)
     elif benchmarkname == 'maxflow':
-        bench = lambda x: x.maxflow()
+        def bench(x): return x.maxflow()
     elif benchmarkname == 'maxflow-RTF':
-        bench = lambda x: x.maxflow(algorithm='RTF')
+        def bench(x): return x.maxflow(algorithm='RTF')
     else:
         sys.stderr.write('Invalid benchmark: ' + benchmarkname + '\n')
         sys.exit(22)
@@ -60,26 +62,28 @@ def benchmarkone(solutions, benchmarkname):
         nimpr += n
     return nimpr, totalcputime
 
+
 # benchmark all input data, dump outcome
 def benchmarkmany(dirname, benchmarkname='2-opt'):
-    #print('language,version,CPU,system,benchmark,instance,n,nsolutions,nimprovements,time(s)')
     for fn in os.listdir(dirname):
         data, solutions = loadfromfile(os.path.join(dirname, fn))
         nimpr, t = benchmarkone(solutions, benchmarkname)
-        print(','.join( (os.path.basename(os.getcwd()), 'Python', 'nested',
-                         sys.implementation.name + ' ' + sys.version.split()[0],
-                         benchmarkname,
-                         os.path.basename(fn), str(data.n),
-                         str(len(solutions)), str(nimpr), str(t))))
+        print(','.join((os.path.basename(os.getcwd()), 'Python', 'nested',
+                        sys.implementation.name + ' ' + sys.version.split()[0],
+                        benchmarkname,
+                        os.path.basename(fn), str(data.n),
+                        str(len(solutions)), str(nimpr), str(t))))
+
 
 def main():
     if len(sys.argv) < 2:
-        sys.stderr.write('USAGE: ' + sys.argv[0] + \
+        sys.stderr.write('USAGE: ' + sys.argv[0] +
                          ' tsp_data_file_dir [benchmark]\n')
         sys.exit(9)
     else:
         benchmark = '2-opt' if len(sys.argv) == 2 else sys.argv[2]
-        t = benchmarkmany(sys.argv[1], benchmark)
-    
+        benchmarkmany(sys.argv[1], benchmark)
+
+
 if __name__ == '__main__':
     main()

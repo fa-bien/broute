@@ -1,7 +1,9 @@
 import collections
 
+
 class Label:
     resources = []
+
     # construct an initial label corresponding to an empty path
     def __init__(self):
         # vertex where this partial path is arriving at
@@ -25,7 +27,7 @@ class Label:
         if self.cost > other.cost or self.length > other.length:
             return False
         for v in self.visited:
-            if not v in other.visited:
+            if v not in other.visited:
                 return False
         for s, o in zip(self.q, other.q):
             if s > o:
@@ -41,8 +43,8 @@ class Label:
         nl.cost = self.cost + rc[self.at][vertex]
         nl.length = self.length + d[self.at][vertex]
         # resource is consumed if i^th bit of vertex is 1
-        nl.q = [ r + 1 if (vertex & (1 << i) > 0) else r
-                 for i, r in enumerate(self.q) ]
+        nl.q = [r + 1 if (vertex & (1 << i) > 0) else r
+                for i, r in enumerate(self.q)]
         return nl
 
     def __repr__(self):
@@ -61,6 +63,7 @@ class Label:
         for s in self.successors:
             s.ignore = True
             s.marksuccessors()
+
 
 # * compare newlabel with collection of labels removing dominated labels as
 #   necessary
@@ -81,7 +84,8 @@ def updatedominance(labels, newlabel):
     # at this point no label has dominated newlabel so we add it
     labels.append(newlabel)
     return True
-    
+
+
 class ESPPRC:
     def __init__(self, n, d, rc, tour, nresources, resourcecapacity, maxlen):
         self.n = n
@@ -90,14 +94,14 @@ class ESPPRC:
         self.nresources = nresources
         self.rescap = resourcecapacity
         self.maxlen = maxlen
-        
+
     def solve(self):
         # initialise DP data: list of labels, queue, initial label, resources
-        vertices = [ x for x in range(self.n) ]
+        vertices = [x for x in range(self.n)]
         Q, Qset = collections.deque(), set([0])
         Q.append(0)
-        labels = [ [] for x in vertices ]
-        Label.resources = [ x for x in range(self.nresources) ]
+        labels = [[] for x in vertices]
+        Label.resources = [x for x in range(self.nresources)]
         labels[0].append(Label())
         # step 3: run DP
         while len(Qset) > 0:
@@ -107,7 +111,8 @@ class ESPPRC:
                 if label.ignore:
                     continue
                 for succ in vertices:
-                    if succ in label.visited or succ == n: continue
+                    if succ in label.visited or succ == n:
+                        continue
                     # succ is a candidate for extension; is it length-feasible?
                     if label.length + self.d[n][succ] + self.d[succ][0] \
                        > self.maxlen:
@@ -118,7 +123,8 @@ class ESPPRC:
                         if (succ & (1 << i) > 0) and r + 1 > self.rescap:
                             rfeas = False
                             break
-                    if not rfeas: continue
+                    if not rfeas:
+                        continue
                     # now we can actually extend the label!
                     nl = label.extend(succ, self.rc, self.d)
                     # Let's update dominance

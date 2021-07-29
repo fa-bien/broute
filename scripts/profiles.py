@@ -60,9 +60,9 @@ def make_profiles(instances, data):
     # Impact of using a flat matrix
     benchmarks = ('2-opt', 'Or-opt', 'lns')
     comps = [ ('C++14', ('c++14', 'c++14-nested-matrix'), ('Flat', 'Nested')),
-              ('Java', ('java', 'java-nested-matrix'), ('Flat', 'Nested')),
-              ('JavaScript', ('javascript', 'javascript-nested-matrix'),
-               ('Flat', 'Nested')),
+              # ('Java', ('java', 'java-nested-matrix'), ('Flat', 'Nested')),
+              # ('JavaScript', ('javascript', 'javascript-nested-matrix'),
+              #  ('Flat', 'Nested')),
               ('Julia', ('julia-flat-matrix', 'julia-array'),
                ('Flat', 'Square')),
               # ('CPython', ('python-flat-matrix', 'python'), ('Flat', 'Nested')),
@@ -110,23 +110,23 @@ def make_profiles(instances, data):
     makeperfprofs(instances, data, benchmarks, comps,
                   titleprefix=titlep, fileprefix=filep)
     
-    ## General cross-language comparison...
-    benchmarks = ('2-opt', 'Or-opt', 'lns', 'maxflow', 'espprc-index')
-    comps = [ ('', ('c++98', 'java', 'javascript', 'julia-flat-matrix',
-                    'pypy', 'rust'),
-               ('C++98', 'Java', 'JavaScript', 'Julia', 'Python', 'Rust')) ]
-    titlep = 'General cross-language comparison'
-    filep = 'cross_language'
-    makeperfprofs(instances, data, benchmarks, comps,
-                  titleprefix=titlep, fileprefix=filep)
-    ## ... including espprc without Rust
-    benchmarks = ('espprc',)
-    comps = [ ('', ('c++98', 'java', 'javascript', 'julia-flat-matrix', 'pypy'),
-               ('C++98', 'Java', 'JavaScript', 'Julia', 'Python')) ]
-    titlep = 'General cross-language comparison'
-    filep = 'cross_language'
-    makeperfprofs(instances, data, benchmarks, comps,
-                  titleprefix=titlep, fileprefix=filep)
+    # ## General cross-language comparison...
+    # benchmarks = ('2-opt', 'Or-opt', 'lns', 'maxflow', 'espprc-index')
+    # comps = [ ('', ('c++98', 'java', 'javascript', 'julia-flat-matrix',
+    #                 'pypy', 'rust'),
+    #            ('C++98', 'Java', 'JavaScript', 'Julia', 'Python', 'Rust')) ]
+    # titlep = 'General cross-language comparison'
+    # filep = 'cross_language'
+    # makeperfprofs(instances, data, benchmarks, comps,
+    #               titleprefix=titlep, fileprefix=filep)
+    # ## ... including espprc without Rust
+    # benchmarks = ('espprc',)
+    # comps = [ ('', ('c++98', 'java', 'javascript', 'julia-flat-matrix', 'pypy'),
+    #            ('C++98', 'Java', 'JavaScript', 'Julia', 'Python')) ]
+    # titlep = 'General cross-language comparison'
+    # filep = 'cross_language'
+    # makeperfprofs(instances, data, benchmarks, comps,
+    #               titleprefix=titlep, fileprefix=filep)
 
     ## Cross-language comparison: fast languages
     benchmarks = ('2-opt', 'Or-opt', 'lns', 'maxflow', 'espprc-index')

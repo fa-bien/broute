@@ -1,8 +1,8 @@
-import sys
 import collections
 
 Inf = 100000
 zero = 0
+
 
 # cap[i][j] is the capacity of arc (i, j)
 # flow[i][j]g is where we store the flow from i to j
@@ -13,7 +13,7 @@ def edmondskarp(cap, flow, n, s, t):
     totalflow = 0.0
     moreflow = True
     Q = collections.deque()
-    pred = [ -1 for i in range(n) ]
+    pred = [-1 for i in range(n)]
     for i in range(n):
         for j in range(n):
             flow[i][j] = 0.0
@@ -47,6 +47,7 @@ def edmondskarp(cap, flow, n, s, t):
             moreflow = False
     return totalflow
 
+
 # taken and slightly adapted from wikipedia
 def relabel_to_front(C, F, n, source, sink):
     for i in range(n):
@@ -56,7 +57,7 @@ def relabel_to_front(C, F, n, source, sink):
 
     height = [0] * n  # height of node
     excess = [0] * n  # flow into node minus flow from node
-    seen   = [0] * n  # neighbours seen since last relabel
+    seen = [0] * n  # neighbours seen since last relabel
     # node "queue"
     nodelist = [i for i in range(n) if i != source and i != sink]
 
@@ -88,8 +89,8 @@ def relabel_to_front(C, F, n, source, sink):
                 relabel(u)
                 seen[u] = 0
 
-    height[source] = n  # longest path from source to sink is less than n long
-    excess[source] = Inf # send as much flow as possible to neighbours of source
+    height[source] = n   # longest path from source to sink is less than n long
+    excess[source] = Inf  # send as much as possible to neighbours of source
     for v in range(n):
         push(source, v)
 

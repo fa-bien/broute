@@ -1,9 +1,8 @@
-import sys
-import copy
 import random
 import math
 
 mapsize = 100
+
 
 # encapsulate TSP data: instance + starting solutions to optimise for
 # benchmarking purpose
@@ -16,30 +15,31 @@ class TSPData:
         # and represents some kind of input data, therefore this is a good
         # place to have it.
         # dummy values to begin with...
-        self.aux = [ [ float(x) for x in row ] for row in d ]
+        self.aux = [[float(x) for x in row] for row in d]
         # second auxiliary graph used to store results e.g. for maxflow
-        self.aux2 = [ [ 0.0 for x in row ] for row in d ]
-        
+        self.aux2 = [[0.0 for x in row] for row in d]
+
     def matrixstring(self):
-        rows = [ ' '.join(str(x) for x in row) for row in self.d ]
+        rows = [' '.join(str(x) for x in row) for row in self.d]
         return '\n'.join(rows)
-    
+
     def genrandom(self, n):
-        x = [ random.choice(range(mapsize)) for x in range(n) ]
-        y = [ random.choice(range(mapsize)) for x in range(n) ]
+        x = [random.choice(range(mapsize)) for x in range(n)]
+        y = [random.choice(range(mapsize)) for x in range(n)]
         self.n = n
         # Euclidean distances
-        self.d = [ [ int(math.hypot(x[i]-x[j], y[i]-y[j]) * 100)
-                     for j in range(n) ] for i in range(n) ]
+        self.d = [[int(math.hypot(x[i]-x[j], y[i]-y[j]) * 100)
+                   for j in range(n)] for i in range(n)]
         # triangle inequality correction
         for i in range(n):
             for j in range(n):
-                if i == j: continue
+                if i == j:
+                    continue
                 for k in range(n):
-                    if i == k or j == k: continue
+                    if i == k or j == k:
+                        continue
                     if self.d[i][j] + self.d[j][k] < self.d[i][k]:
                         self.d[i][k] = self.d[i][j] + self.d[j][k]
-
 
     def genrandomcycle(self):
         # solution generation: random permutations

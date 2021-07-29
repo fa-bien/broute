@@ -10,7 +10,7 @@ nsols = int(sys.argv[2])
 a = tspdata.TSPData(n, [])
 a.genrandom(n)
 
-#a.savetofile('test.txt')
+# a.savetofile('test.txt')
 print('# n n_solutions')
 print(n, nsols)
 print('# n x n distance matrix')

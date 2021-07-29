@@ -2,6 +2,7 @@ import collections
 
 import espprc
 
+
 class LabelWithIndex(espprc.Label):
     # construct an initial label corresponding to an empty path
     def __init__(self):
@@ -29,19 +30,20 @@ class LabelWithIndex(espprc.Label):
         nl.cost = self.cost + rc[self.at][vertex]
         nl.length = self.length + d[self.at][vertex]
         # resource is consumed if i^th bit of vertex is 1
-        nl.q = [ r + 1 if (vertex & (1 << i) > 0) else r
-                 for i, r in enumerate(self.q) ]
+        nl.q = [r + 1 if (vertex & (1 << i) > 0) else r
+                for i, r in enumerate(self.q)]
         return nl
 
     def __repr__(self):
         return 'Label at node ' + str(self.at) \
             + '\tcost = ' + str(self.cost) + '\tlength = ' + str(self.length) \
             + '\tq = ' + str(self.q)
-    
+
+
 class LabelCollection:
     def __init__(self):
         self.labels = []
-        
+
     def marksuccessors(self, lindex):
         for s in self.labels[lindex].successors:
             self.labels[s].ignore = True
@@ -75,15 +77,16 @@ class LabelCollection:
     def extend(self, rc, d, fro, to):
         self.labels.append(self.labels[fro].extend(rc, d, fro, to))
         return len(self.labels) - 1
-    
+
+
 class ESPPRCLC(espprc.ESPPRC):
     def solve(self):
         # initialise DP data: list of labels, queue, initial label, resources
-        vertices = [ x for x in range(self.n) ]
+        vertices = [x for x in range(self.n)]
         Q, Qset = collections.deque(), set([0])
         Q.append(0)
-        labels = [ [] for x in vertices ]
-        LabelWithIndex.resources = [ x for x in range(self.nresources) ]
+        labels = [[] for x in vertices]
+        LabelWithIndex.resources = [x for x in range(self.nresources)]
         # label collection
         lc = LabelCollection()
         l0 = lc.emptylabel()
@@ -97,7 +100,8 @@ class ESPPRCLC(espprc.ESPPRC):
                 if label.ignore:
                     continue
                 for succ in vertices:
-                    if succ in label.visited or succ == n: continue
+                    if succ in label.visited or succ == n:
+                        continue
                     # succ is a candidate for extension; is it length-feasible?
                     if label.length + self.d[n][succ] + self.d[succ][0] \
                        > self.maxlen:
@@ -108,7 +112,8 @@ class ESPPRCLC(espprc.ESPPRC):
                         if (succ & (1 << i) > 0) and r + 1 > self.rescap:
                             rfeas = False
                             break
-                    if not rfeas: continue
+                    if not rfeas:
+                        continue
                     # now we can actually extend the label!
                     nl = lc.extend(self.rc, self.d, lindex, succ)
                     # Let's update dominance
@@ -120,4 +125,4 @@ class ESPPRCLC(espprc.ESPPRC):
                         Q.append(succ)
                 label.ignore = True
         # step 4: return distance of cheapest label as hash value.
-        return min(lc.labels[l].cost for l in labels[0])
+        return min(lc.labels[ll].cost for ll in labels[0])

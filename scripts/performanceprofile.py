@@ -73,6 +73,9 @@ def plotPerformanceProfile(methods, instances, results,
         ax.set_xscale('log')
     if title:
         ax.set_title(title, fontsize=16)
+    # axis labels
+    ax.set_xlabel('Performance level (lower is better)', size=14)
+    ax.set_ylabel('Ratio of instances solved', size=14)
     # now we plot all of it
     for (i, met), name in zip(enumerate(methods), descriptions):
         xs = [ x[0] for x in allSteps[met] ]

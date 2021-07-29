@@ -2,10 +2,10 @@ import sys
 import copy
 from itertools import chain
 
-import tspdata
 import espprc
 import espprcindex
 import maxflow
+
 
 class TSPSolution:
     def __init__(self, data, permutation):
@@ -41,25 +41,25 @@ class TSPSolution:
         # actually speeds things up!
         tour, d = self.nodes, self.data.d
         for i in range(1, len(tour) - 1):
-            for l in range(1, 1 + min(3, len(tour)-1-i)):
-                for p in chain(range(i-1), range(i+l, len(tour)-1)):
-                    delta = d[tour[i-1]][tour[i+l]] + d[tour[p]][tour[i]] + \
-                        d[tour[i+l-1]][tour[p+1]] - d[tour[p]][tour[p+1]]\
-                        - d[tour[i-1]][tour[i]] - d[tour[i+l-1]][tour[i+l]]
+            for ll in range(1, 1 + min(3, len(tour)-1-i)):
+                for p in chain(range(i-1), range(i+ll, len(tour)-1)):
+                    delta = d[tour[i-1]][tour[i+ll]] + d[tour[p]][tour[i]] + \
+                        d[tour[i+ll-1]][tour[p+1]] - d[tour[p]][tour[p+1]]\
+                        - d[tour[i-1]][tour[i]] - d[tour[i+ll-1]][tour[i+ll]]
                     # perform improving move
                     if delta < 0:
                         # store sequence to move
-                        t = [ x for x in tour[i:i+l] ]
+                        t = [x for x in tour[i:i+ll]]
                         if i < p:
                             # shift stuff left
-                            tour[i:p-l+1] = tour[i+l:p+1]
+                            tour[i:p-ll+1] = tour[i+ll:p+1]
                             # copy sequence right of the stuff
-                            tour[p+1-l:p+1] = t[:]
+                            tour[p+1-ll:p+1] = t[:]
                         else:
                             # shift stuff right
-                            tour[i-1+l:p+l:-1] = tour[i-1:p:-1]
+                            tour[i-1+ll:p+ll:-1] = tour[i-1:p:-1]
                             # copy sequence right of the stuff
-                            tour[p+1:p+1+l] = t[:]
+                            tour[p+1:p+1+ll] = t[:]
                         return True
         return False
 
@@ -101,15 +101,15 @@ class TSPSolution:
     def espprc(self, nresources=6, resourcecapacity=1, index=False):
         n, tour, d, rc = self.data.n, self.nodes, self.data.d, self.data.aux
         # update reduced costs
-        dual = [ 0.0 for x in range(n) ]
+        dual = [0.0 for x in range(n)]
         for (i, j) in zip(tour[:-1], tour[1:]):
             dual[j] = d[i][j]
         for i in range(n):
             for j in range(n):
                 rc[i][j] = float(d[i][j] - dual[j])
         # max len: sum of best assignments
-        maxlen = sum([ min([d[i][j] for j in range(n) if i != j])
-                       for i in range(n)])
+        maxlen = sum([min([d[i][j] for j in range(n) if i != j])
+                      for i in range(n)])
         if not index:
             e = espprc.ESPPRC(n, d, rc,
                               self.nodes, nresources, resourcecapacity, maxlen)
@@ -126,7 +126,7 @@ class TSPSolution:
         n, tour, d = self.data.n, self.nodes, self.data.d
         cap, flow = self.data.aux, self.data.aux2
         # first we build the capacity graph
-        t = [ 0.0 for x in range(n) ]
+        t = [0.0 for x in range(n)]
         for (i, j) in zip(tour[:-1], tour[1:]):
             t[j] = d[i][j]
         for j in range(n):
@@ -141,7 +141,7 @@ class TSPSolution:
                 mf = maxflow.relabel_to_front(cap, flow, n, 0, sink)
             checksum += mf
         return int(checksum)
-    
+
     def cost(self):
         total = 0
         for i, j in zip(self.nodes[:-1], self.nodes[1:]):
