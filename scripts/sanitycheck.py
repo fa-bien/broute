@@ -2,6 +2,8 @@
 
 import sys
 
+REF_IMPL = 'c++14'
+
 def loadCSV(fnames):
     out = {}
     for fname in fnames:
@@ -15,26 +17,25 @@ def loadCSV(fnames):
         # now actually read rows of experimental data
         for line in lines[1:]:
             tokens = line.rstrip().split(',')
-            lang = tokens[column_index['language']]
+            impl = tokens[column_index['implementation']]
             bench = tokens[column_index['benchmark']]
             instance = tokens[column_index['instance']]
             checksum = tokens[column_index['checksum']]
-            out[lang, bench, instance] = checksum
+            out[impl, bench, instance] = checksum
     return out
 
 # return true if expdata contains only checksum-consistent results across
 # different languages, false otherwise
 def sanityCheck(expdata):
     allgood = True
-    for lang, bench, inst in expdata:
-        # c++ provides reference values
+    for impl, bench, inst in expdata:
         # we could pick any language but c++ is likely to be in all data sets
-        if lang != 'c++':
-            if expdata[lang, bench, inst] != expdata['c++', bench, inst]:
-                print('Inconsistent data between c++ and', lang,
+        if impl != REF_IMPL:
+            if expdata[impl, bench, inst] != expdata[REF_IMPL, bench, inst]:
+                print('Inconsistent data between', REF_IMPL, 'and', impl,
                       'for benchmark', bench, 'and instance',
-                      inst, ':', expdata['c++', bench, inst], 'vs',
-                      expdata[lang, bench, inst])
+                      inst, ':', expdata[REF_IMPL, bench, inst], 'vs',
+                      expdata[impl, bench, inst])
                 allgood = False
     return allgood
 
