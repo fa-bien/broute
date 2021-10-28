@@ -7,8 +7,11 @@ mapsize = 100
 # encapsulate TSP data: instance + starting solutions to optimise for
 # benchmarking purpose
 class TSPData:
-    def __init__(self, n, d):
-        self.n, self.d = n, d
+    def __init__(self, n=0, d=[], filename=None):
+        if filename is None:
+            self.n, self.d = n, d
+        else:
+            self.loadVRPLIB(filename)
         # auxiliary graph used e.g. for storing reduced costs (espprc)
         # or flow values (maxflow)
         # Typically it is used many times but only needs to be allocated once
@@ -41,6 +44,35 @@ class TSPData:
                     if self.d[i][j] + self.d[j][k] < self.d[i][k]:
                         self.d[i][k] = self.d[i][j] + self.d[j][k]
 
+    def loadVRPLIB(self, filename):
+        n = 0
+        x, y = [], []
+        state = 'header'
+        with open(filename, 'r') as f:
+            for line in f:
+                if state == 'header':
+                    if line.startswith('DIMENSION : '):
+                        n = int(line.split()[2])
+                    elif line.startswith('NODE_COORD_SECTION'):
+                        state = 'nodes'
+                    else:
+                        pass
+                elif state == 'nodes':
+                    if line.startswith('DEMAND_SECTION'):
+                        state = 'done'
+                    else:
+                        toks = line.split()
+                        i, u, v = int(toks[0]), float(toks[1]), float(toks[2])
+                        x.append(u)
+                        y.append(v)
+                        assert i == len(x), 'incorrect index in VRPLIB file'
+                else:
+                    pass
+        # Euclidean distances
+        self.n = n
+        self.d = [[int(math.hypot(x[i]-x[j], y[i]-y[j]) * 100)
+                   for j in range(n)] for i in range(n)]
+                        
     def genrandomcycle(self):
         # solution generation: random permutations
         # solutions always start and end with zero
