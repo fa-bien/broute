@@ -72,6 +72,9 @@ class TSPData:
         self.n = n
         self.d = [[int(math.hypot(x[i]-x[j], y[i]-y[j]) * 100)
                    for j in range(n)] for i in range(n)]
+
+        for u, v in zip(x, y):
+            print(u, v)
                         
     def genrandomcycle(self):
         # solution generation: random permutations
