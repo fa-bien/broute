@@ -179,23 +179,23 @@ for (bench in c('2-opt', 'Or-opt', 'lns', 'espprc', 'maxflow')) {
     dev.off()
 }
 
-## General cross-language comparison
-ds <- subset(runs, implementation %in%
-                   c('c++98', 'java', 'javascript', 'julia-flat-matrix',
-                     'pypy', 'rust'))
-for (bench in c('2-opt', 'Or-opt', 'lns', 'espprc', 'espprc-index', 'maxflow')){
-    pdf(paste0('cross_language-', bench, '-boxplot.pdf'))
-    title <- paste0('General cross-language comparison (', bench, ')')
-    p <- ggplot(subset(ds, benchmark == bench),
-                aes(y=normalised, color=language, fill=after_scale(color))) +
-        facet_wrap(~n, strip.position="bottom") + 
-        geom_boxplot(alpha=0.2, outlier.alpha=.5) +
-        labs(x='n', y='CPU time (ratio of C++14 time)',
-             color='Language', title=title) + 
-        theme_bw() + mytheme + palette
-    print(p)
-    dev.off()
-}
+## ## General cross-language comparison
+## ds <- subset(runs, implementation %in%
+##                    c('c++98', 'java', 'javascript', 'julia-flat-matrix',
+##                      'pypy', 'rust'))
+## for (bench in c('2-opt', 'Or-opt', 'lns', 'espprc', 'espprc-index', 'maxflow')){
+##     pdf(paste0('cross_language-', bench, '-boxplot.pdf'))
+##     title <- paste0('General cross-language comparison (', bench, ')')
+##     p <- ggplot(subset(ds, benchmark == bench),
+##                 aes(y=normalised, color=language, fill=after_scale(color))) +
+##         facet_wrap(~n, strip.position="bottom") + 
+##         geom_boxplot(alpha=0.2, outlier.alpha=.5) +
+##         labs(x='n', y='CPU time (ratio of C++14 time)',
+##              color='Language', title=title) + 
+##         theme_bw() + mytheme + palette
+##     print(p)
+##     dev.off()
+## }
 
 ## Cross-language comparison: fast languages
 ds <- subset(runs, implementation %in%
