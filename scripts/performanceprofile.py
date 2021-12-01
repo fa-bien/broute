@@ -7,16 +7,16 @@ import matplotlib.pyplot as plt
 def isNumber(x):
     return isinstance(x, numbers.Number)
 
-lineStyles = [ 'solid',
+defaultlinestyles = [ 'solid',
                (0, (8, 4)),
                'dotted',
                (0, (8, 4, 2, 2)),
                (0, (8, 4, 2, 2, 2, 2, 2, 2)),
                'dotted',
-               'dashdot'
-]
-lineColours = [ '#ae3638', '#3b69ac', 'green', 'orange', 'purple', 'brown',
-                'pink' ]
+               'dashdot']
+
+defaultcolours = [ '#ae3638', '#3b69ac', 'green', 'orange', 'purple', 'brown',
+                   'pink' ]
 
 # 'methods' is a list of methods to compare
 # 'instances' is a list of instances to use for that comparison
@@ -25,7 +25,9 @@ lineColours = [ '#ae3638', '#3b69ac', 'green', 'orange', 'purple', 'brown',
 def plotPerformanceProfile(methods, instances, results,
                            fName='perfprof.pdf', descriptions=None,
                            title=None, logscale=False, interactive=True,
-                           verbose=False):
+                           verbose=False,
+                           colours=defaultcolours,
+                           linestyles=defaultlinestyles):
     if not descriptions:
         descriptions = methods
     bestPerf = {}
@@ -74,12 +76,18 @@ def plotPerformanceProfile(methods, instances, results,
     if title:
         ax.set_title(title, fontsize=16)
     # axis labels
-    ax.set_xlabel('Performance level (lower is better)', size=14)
+    ax.set_xlabel('Performance level', size=14)
+    # ax.set_xlabel('Performance level (lower is better)', size=14)
     ax.set_ylabel('Ratio of instances solved', size=14)
     # now we plot all of it
     for (i, met), name in zip(enumerate(methods), descriptions):
         xs = [ x[0] for x in allSteps[met] ]
         ys = [ x[1] for x in allSteps[met] ]
+        # case where this method never has the best performance:
+        # initial step at level 0
+        if xs[0] > 1.0:
+            xs = [1] + xs
+            ys = [0] + ys
         xs.append(worstPerf)
         if len(perfRatios[met]) == len(bestPerf):
             ys.append(1)
@@ -87,9 +95,9 @@ def plotPerformanceProfile(methods, instances, results,
             ys.append(ys[-1])
         ax.plot( xs, ys, drawstyle='steps-post',
                  label=name,
-                 linestyle=lineStyles[i],
+                 linestyle=linestyles[i],
                  # antialiased=False,
-                 color=lineColours[i],
+                 color=colours[i],
                  linewidth=2)
         leg = ax.legend(loc='lower right', borderaxespad=.5, fontsize=14,
                         handlelength=3

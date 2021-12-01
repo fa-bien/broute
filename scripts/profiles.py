@@ -6,6 +6,9 @@ import os
 import performanceprofile as pp
 from functools import reduce
 
+
+colours = ["#2571ac", "#cb6528", "#c37ea3", "#000000", "#f0ed60", "#3c9975"]
+
 def load_all_CSVs(dirname):
     all_data = {}
     instances = set()
@@ -53,7 +56,8 @@ def makeperfprofs(instances, data, benchmarks, comps,
             pp.plotPerformanceProfile(methods, instances, results[bench],
                                       title=title,
                                       fName=fName,
-                                      descriptions=names)
+                                      descriptions=names,
+                                      colours=colours)
 
 def make_profiles(instances, data):
     
@@ -106,7 +110,7 @@ def make_profiles(instances, data):
     benchmarks = ('2-opt', 'Or-opt', 'lns', 'espprc', 'maxflow')
     comps = [ ('', ('c++14', 'c++98'), ('C++14', 'C++98')) ]
     titlep = 'C++14 vs C++98'
-    filep = 'C++14_vs_C++98-'
+    filep = 'C++14_vs_C++98'
     makeperfprofs(instances, data, benchmarks, comps,
                   titleprefix=titlep, fileprefix=filep)
     
@@ -147,8 +151,8 @@ def make_profiles(instances, data):
     
     ## Cross-language comparison: interpreted languages
     benchmarks = ('2-opt', 'Or-opt', 'lns', 'maxflow', 'espprc')
-    comps = [ ('', ('pypy', 'javascript'),
-               ('Python', 'JavaScript')) ]
+    comps = [ ('', ('javascript', 'pypy'),
+               ('JavaScript', 'Python')) ]
     titlep = 'Cross-language comparison: "Interpreted" languages'
     filep = 'interpreted_languages'
     makeperfprofs(instances, data, benchmarks, comps,
